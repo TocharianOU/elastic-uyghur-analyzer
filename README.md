@@ -75,27 +75,27 @@ Need assistance? Here are ways to get support for the **Elasticsearch Uyghur Ana
 
 ## 快速入门指南
 要快速开始使用**维吾尔语分析器插件**：
-1. **安装插件**：请参考[入门指南](docs/getting_started.md)中的设置说明。
+1. **安装插件**：请参考[入门指南](docs/getting_started_zh.md)中的设置说明。
 2. **配置分词器**：
    - 添加`uyghur_original_tokenizer`以实现形态还原分词。
    - 使用`uyghur_split_tokenizer`进行保留弱化元音的直接分割。
 3. **运行示例查询**：使用示例查询测试插件，验证分词准确性和过滤效果。
 
-更多设置详情，请查看完整的[入门指南](docs/getting_started.md)。
+更多设置详情，请查看完整的[入门指南](docs/getting_started_zh.md)。
 
 ## Elasticsearch维吾尔语分析器安装
 支持的Elasticsearch版本：**[指定支持的版本]**。
 1. 确认与你的Elasticsearch版本兼容。
-2. 按照[入门指南](docs/getting_started.md)中的逐步说明安装插件。
+2. 按照[入门指南](docs/getting_started_zh.md)中的逐步说明安装插件。
 
 ## 词典配置
-插件包含基于形态学的维吾尔语文本分析词典，可根据需要进行自定义。配置步骤请参见[词典说明](docs/dictionary_explanation.md)。
+插件包含基于形态学的维吾尔语文本分析词典，可根据需要进行自定义。配置步骤请参见[词典说明](docs/dictionary_explanation_zh.md)。
 
 ## 贡献指南
-我们欢迎社区为**Elasticsearch维吾尔语分析器插件**贡献代码和改进建议！请查看[贡献指南](docs/contribution_guide.md)了解设置、编码规范和贡献详情。
+我们欢迎社区为**Elasticsearch维吾尔语分析器插件**贡献代码和改进建议！请查看[贡献指南](docs/contribution_guide_zh.md)了解设置、编码规范和贡献详情。
 
 ## 常见问题
-需要帮助？请查看我们的[FAQ](docs/faq.md)，了解常见问题和解决方法。
+需要帮助？请查看我们的[FAQ](docs/faq_zh.md)，了解常见问题和解决方法。
 
 ## 许可证
 本项目采用Apache License 2.0许可。详情请参阅[LICENSE](LICENSE)文件。
