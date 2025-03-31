@@ -33,6 +33,9 @@ Supported Elasticsearch Version: **[Specify Supported Versions]**.
 1. Verify compatibility with your Elasticsearch version.
 2. Install the plugin by following the step-by-step instructions in the [Getting Started Guide](docs/getting_started.md).
 
+## Build Guide
+The current directory contains built-in gradle and complete build steps, please refer to the [Build Guide](docs/build_guide_zh.md).
+
 ## Dictionary Configuration
 The plugin includes dictionaries for morphology-based Uyghur text analysis, which you can customize as needed. For configuration steps, see the [Dictionary Explanation](docs/dictionary_explanation.md).
 
@@ -87,6 +90,9 @@ Need assistance? Here are ways to get support for the **Elasticsearch Uyghur Ana
 支持的Elasticsearch版本：**[指定支持的版本]**。
 1. 确认与你的Elasticsearch版本兼容。
 2. 按照[入门指南](docs/getting_started_zh.md)中的逐步说明安装插件。
+
+## 构建指南
+当前目录下包含内置gradle以及完整构建步骤，请参见[构建指南](docs/build_guide_zh.md)。
 
 ## 词典配置
 插件包含基于形态学的维吾尔语文本分析词典，可根据需要进行自定义。配置步骤请参见[词典说明](docs/dictionary_explanation_zh.md)。

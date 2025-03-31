@@ -1,76 +1,171 @@
-# Getting Started with the Uyghur Text Analysis Plugin for Elasticsearch
+# Quick Start Guide for Elastic Uyghur Analyzer Plugin
 
-Welcome to the Uyghur Text Analysis Plugin! This guide will provide step-by-step instructions for installing, configuring, and testing the plugin in your Elasticsearch environment.
+This guide provides quick installation and usage instructions for the Elastic Uyghur Analyzer Plugin, helping you implement Uyghur text analysis in Elasticsearch.
 
-## Prerequisites
+## Compatibility
 
-Ensure the following before starting:
-- Elasticsearch 8.7.0 or higher is installed.
-- Access to the server command line where Elasticsearch is installed.
-- Administrative rights to manage Elasticsearch plugins.
+- Elasticsearch 8.7.0
+- Java 17 or later
 
-## Installation
+## Installing the Plugin
 
-Follow these steps to install the Uyghur Text Analysis Plugin:
+### Method 1: Direct Installation (for existing Elasticsearch environments)
 
-1. **Download the Plugin**
-   - Download the `.zip` file from the GitHub releases page.
+1. Download the plugin ZIP file:
+   ```bash
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   ```
 
-2. **Install the Plugin**
-   - Open your Elasticsearch directory on the command line and run:
-     ```bash
-     bin/elasticsearch-plugin install file:///path/to/plugin/uyghur-analysis-plugin.zip
-     ```
-   - Replace `/path/to/plugin/` with the path where the downloaded `.zip` file is located.
+2. Install using the Elasticsearch plugin manager:
+   ```bash
+   bin/elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-8.7.0.zip
+   ```
 
-3. **Verify Installation**
-   - Restart Elasticsearch and ensure the plugin is loaded by running:
-     ```bash
-     curl -X GET "localhost:9200/_cat/plugins?v=true"
-     ```
-   - Confirm that `uyghur_analysis_plugin` is listed among the installed plugins.
+3. Restart Elasticsearch:
+   ```bash
+   # For systemd-based systems
+   systemctl restart elasticsearch
+   
+   # Or for init.d-based systems
+   service elasticsearch restart
+   ```
 
-## Configuration
+### Method 2: Docker Installation
 
-The `uyghur_original_analyzer` and `uyghur_split_analyzer` are  available out of the box and can be used immediately to analyze text:
+1. Start an Elasticsearch container:
+   ```bash
+   docker run -d --name es -p 9200:9200 -p 9300:9300 \
+     -e "discovery.type=single-node" \
+     -e "ELASTIC_PASSWORD=your_password" \
+     docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+   ```
 
+2. Copy the plugin to the container and install it:
+   ```bash
+   docker cp uyghur-analyzer-plugin-8.7.0.zip es:/tmp/
+   docker exec -it -u root es bash -c "chown elasticsearch:root /tmp/uyghur-analyzer-plugin-8.7.0.zip && \
+     /usr/share/elasticsearch/bin/elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-8.7.0.zip"
+   ```
 
-```json
-PUT /my_index
+3. Restart the container:
+   ```bash
+   docker restart es
+   ```
+
+## Verifying Installation
+
+Check that the plugin is installed correctly:
+
+```bash
+bin/elasticsearch-plugin list
+# Or in Docker
+docker exec es elasticsearch-plugin list
+```
+
+You should see `uyghur-analyzer-plugin` in the list.
+
+## Using the Plugin
+
+### Creating an Index with the Uyghur Analyzer
+
+```bash
+curl -X PUT "localhost:9200/uyghur_index" -H "Content-Type: application/json" -d'
 {
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "uyghur_analyzer": {
+          "type": "uyghur_original_analyzer"
+        }
+      }
+    }
+  },
   "mappings": {
     "properties": {
       "content": {
         "type": "text",
-        "analyzer": "uyghur_original_analyzer"
-      },
-      "content_split": {
-        "type": "text",
-        "analyzer": "uyghur_split_analyzer"
+        "analyzer": "uyghur_analyzer"
       }
     }
   }
-}
+}'
 ```
 
+If security is enabled, add authentication:
 
-```json
-POST /my_index/_analyze
+```bash
+curl -k -X PUT "https://localhost:9200/uyghur_index" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" \
+  -d'{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "uyghur_analyzer": {
+          "type": "uyghur_original_analyzer"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "analyzer": "uyghur_analyzer"
+      }
+    }
+  }
+}'
+```
+
+### Testing the Analyzer
+
+```bash
+curl -X POST "localhost:9200/uyghur_index/_analyze" -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_original_analyzer",  //uyghur_split_analyzer
-  "text": "يېزىلاردىكى ئېشىنچا ئەمگەكچىلەرنى"
-}
+  "analyzer": "uyghur_analyzer",
+  "text": "مەن ئۇيغۇرچە سۆزلەيمەن"
+}'
 ```
 
-This will return the text broken down into tokens based on Uyghur morphology.
+### Indexing Documents
 
+```bash
+curl -X POST "localhost:9200/uyghur_index/_doc" -H "Content-Type: application/json" -d'
+{
+  "content": "يېزىلاردىكى ئېشىنچا ئەمگەكچىلەرنى"
+}'
+```
 
-### Configuring a Custom Analyzer
+### Searching Documents
 
-To set up a custom analyzer named `my_custom_analyzer`, use the following configuration for an index:
+```bash
+curl -X GET "localhost:9200/uyghur_index/_search" -H "Content-Type: application/json" -d'
+{
+  "query": {
+    "match": {
+      "content": "يېزا"
+    }
+  }
+}'
+```
 
-```json
-PUT /costum_text
+## Available Analyzers and Filters
+
+### Analyzers
+
+1. `uyghur_original_analyzer` - Preserves original word forms while providing morphological analysis
+2. `uyghur_split_analyzer` - Splits words into morphological components
+
+### Token Filters
+
+1. `uyghur_word_original` - Token filter for original word forms
+2. `uyghur_word_split` - Token filter for split word forms
+
+### Custom Analyzer Example
+
+```bash
+curl -X PUT "localhost:9200/custom_index" -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -91,14 +186,33 @@ PUT /costum_text
       }
     }
   }
-}
+}'
 ```
 
+## Troubleshooting
 
-## Next Steps
+### Common Issues
 
-Explore the capabilities of both the pre-configured and custom analyzers. For any issues or further questions, refer to the [FAQ](faq.md) or open an issue on GitHub.
+1. **Plugin installation fails**:
+   - Check if Elasticsearch version is 8.7.0
+   - Ensure you're using Java 17
+   - Check Elasticsearch logs
 
-Thank you for using the Uyghur Text Analysis Plugin for Elasticsearch!
+2. **Analyzer doesn't work**:
+   - Confirm the plugin is installed correctly
+   - Check analyzer configuration in index settings
+   - Try rebuilding the index
 
+3. **Search results not as expected**:
+   - Use the `_analyze` API to check how text is tokenized
+   - Adjust queries to match tokenization results
 
+## Additional Resources
+
+- [Build Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/build_guide.md)
+- [User Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/tutorial.md)
+- [FAQ](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/faq.md)
+
+## Support
+
+If you encounter any issues or have questions, please [open an issue](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues) on GitHub.

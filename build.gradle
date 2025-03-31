@@ -21,7 +21,7 @@ esplugin {
 }
 
 group 'org.tocharian'
-version '1.0.0'
+version "${elasticsearchVersion}"
 
 repositories {
     mavenLocal()
