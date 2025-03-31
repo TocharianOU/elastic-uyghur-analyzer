@@ -210,7 +210,7 @@ curl -X PUT "localhost:9200/custom_index" -H "Content-Type: application/json" -d
 ## Additional Resources
 
 - [Build Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/build_guide.md)
-- [User Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/tutorial.md)
+- [Usage Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/tutorial.md)
 - [FAQ](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/faq.md)
 
 ## Support
