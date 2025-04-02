@@ -29,7 +29,7 @@ To quickly get started with the **Uyghur Analyzer Plugin**:
 For further setup details, visit the full [Getting Started Guide](docs/getting_started.md).
 
 ## Installation for Elasticsearch Uyghur Analyzer
-Supported Elasticsearch Version: **[Specify Supported Versions]**.
+Supported Elasticsearch Version: **[8.7.0]**.
 1. Verify compatibility with your Elasticsearch version.
 2. Install the plugin by following the step-by-step instructions in the [Getting Started Guide](docs/getting_started.md).
 
@@ -87,7 +87,7 @@ Need assistance? Here are ways to get support for the **Elasticsearch Uyghur Ana
 更多设置详情，请查看完整的[入门指南](docs/getting_started_zh.md)。
 
 ## Elasticsearch维吾尔语分析器安装
-支持的Elasticsearch版本：**[指定支持的版本]**。
+支持的Elasticsearch版本：**[8.7.0]**。
 1. 确认与你的Elasticsearch版本兼容。
 2. 按照[入门指南](docs/getting_started_zh.md)中的逐步说明安装插件。
 
