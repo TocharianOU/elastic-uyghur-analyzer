@@ -116,7 +116,7 @@ Need assistance? Here are ways to get support for the **Elasticsearch Uyghur Ana
 
 ## 支持与帮助
 需要帮助？以下是获取**Elasticsearch维吾尔语分析器插件**支持的途径：
-1. **GitHub问题**：在[GitHub Issues页面](https://github.com/your-repo/issues)提交问题。
+1. **GitHub问题**：在[GitHub Issues页面](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues)提交问题。
 2. **社区论坛和小组**：加入相关论坛或开发者社区。
 3. **直接联系**：联系插件的主要开发者或维护者。
 
