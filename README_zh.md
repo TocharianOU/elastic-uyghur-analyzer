@@ -34,16 +34,16 @@
 
 1. 下载最新插件：
    ```bash
-   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    ```
 
 2. 安装到 Elasticsearch：
    ```bash
    # 从本地文件安装插件
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-8.7.0.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    
    # 或直接从 URL 安装
-   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    ```
 
 3. 重启 Elasticsearch 并验证安装：

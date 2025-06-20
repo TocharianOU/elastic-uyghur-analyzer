@@ -34,16 +34,16 @@ This plugin adds Uyghur language support to Elasticsearch through custom analyze
 
 1. Download the latest plugin:
    ```bash
-   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    ```
 
 2. Install to Elasticsearch:
    ```bash
    # Install plugin from local file
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-8.7.0.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    
    # Or install directly from URL
-   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
    ```
 
 3. Restart Elasticsearch and verify installation:

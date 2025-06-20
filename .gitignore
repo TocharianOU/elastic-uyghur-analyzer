@@ -32,7 +32,6 @@ build/
 .classpath
 .settings/
 bin/
-
 # IntelliJ IDEA
 .idea/
 *.iws
