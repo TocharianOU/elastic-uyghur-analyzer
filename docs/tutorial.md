@@ -33,7 +33,9 @@ The plugin provides two main analyzers:
 Preserves the original word forms while providing morphological analysis, suitable for scenarios where maintaining the original text structure is needed.
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_original_analyzer",
   "text": "ئائىلىلەرنى"
@@ -72,7 +74,9 @@ curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
 Decomposes words into morphological components, suitable for search scenarios requiring higher recall rates.
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_split_analyzer",
   "text": "ئائىلىلەرنى"
@@ -113,7 +117,9 @@ curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
 Here is a basic index configuration that can be used directly, suitable for most Uyghur text processing scenarios:
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_docs" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -150,7 +156,9 @@ curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
 Using different analyzers for the same field to support different search requirements:
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_advanced" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_advanced" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -187,42 +195,54 @@ curl -X PUT "localhost:9200/uyghur_advanced" -H "Content-Type: application/json"
 
 ```bash
 # Medical document example
-curl -X POST "localhost:9200/uyghur_docs/_doc/1" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/1" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "يۇقۇملۇق كېسەللەر توغرىسىدا",
   "content": "يۇقۇملۇق كېسەللەر ۋىرۇس، باكتېرىيە ياكى باشقا مىكروئورگانىزملار تەرىپىدىن كېلىپ چىقىدىغان كېسەللەر بولۇپ، بۇلار ئادەملەر ئارىسىدا ئاسانلا تارقىلىدۇ. بۇ خىل كېسەللەردىن ساقلىنىش ئۈچۈن شەخسىي پاكىزلىققا دىققەت قىلىش ۋە ۋاقتىدا ۋاكسىنا ئۇرۇش مۇھىم."
 }'
 
 # Medical diagnosis example
-curl -X POST "localhost:9200/uyghur_docs/_doc/2" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/2" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "يۈرەك كېسەللىكلىرىنىڭ دىئاگنوزى",
   "content": "يۈرەك كېسەللىكلىرىنى دىئاگنوز قىلىشتا ئېلېكتروكاردىئوگرام (ئې.ك.گ)، ئېكوكاردىئوگرافىيە ۋە قان تەكشۈرۈش قاتارلىق ئۇسۇللار قوللىنىلىدۇ. بېمارلاردا كۆكرەك ئاغرىقى، نەپەس قىسىش ياكى ھالسىزلىق ئالامەتلىرى كۆرۈلگەندە، دەرھال دوختۇرغا مۇراجىئەت قىلىش كېرەك."
 }'
 
 # Legal document example - Civil contract
-curl -X POST "localhost:9200/uyghur_docs/_doc/3" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/3" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "ئۆي ئىجارە كېلىشىمى",
   "content": "بۇ كېلىشىم ئۆي ئىگىسى ۋە ئىجارىكەش ئوتتۇرىسىدا تۈزۈلگەن بولۇپ، ئىجارە مۇددىتى، ئايلىق ئىجارە ھەققى، تۆلەم ئۇسۇلى ۋە تەرەپلەرنىڭ مەجبۇرىيەتلىرىنى بەلگىلەيدۇ. كېلىشىمنى بۇزغان تەرەپ قانۇن بويىچە جاۋابكارلىققا تارتىلىدۇ."
 }'
 
 # Legal document example - Criminal case
-curl -X POST "localhost:9200/uyghur_docs/_doc/4" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/4" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "جىنايى ئىشلار قانۇنى بويىچە ئەرز قىلىش جەريانى",
   "content": "جىنايى ئىشلار قانۇنى بويىچە ئەرز قىلىش جەريانىدا، دەۋاگەر دەلىل-ئىسپاتلارنى توپلاپ، ساقچى ئىدارىسىگە ياكى پروكۇرورلۇق ئورگىنىغا مۇراجىئەت قىلىشى كېرەك. ئەرزنامە يېزىلغاندا ۋەقە جەريانى، ۋاقتى، ئورنى ۋە ئالاقىدار شەخسلەر توغرىسىدا تەپسىلىي مەلۇمات بېرىلىشى لازىم."
 }'
 
 # Medical research paper example
-curl -X POST "localhost:9200/uyghur_docs/_doc/5" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/5" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "قەنت كېسىلى ۋە ئۇنىڭ داۋالاش ئۇسۇللىرى ھەققىدە تەتقىقات",
   "content": "بۇ تەتقىقاتتا قەنت كېسىلىنىڭ ئۇيغۇر نوپۇسى ئارىسىدىكى تارقىلىشى ۋە ئۇنى داۋالاشنىڭ زامانىۋى ئۇسۇللىرى مۇھاكىمە قىلىنغان. تەتقىقات نەتىجىلىرى كۆرسەتكەندەك، كۈندىلىك تۇرمۇش ئادەتلىرىنى ئۆزگەرتىش، مۇۋاپىق بەدەن چېنىقتۇرۇش ۋە دورا داۋالاش ئارقىلىق قەنت كېسىلىنى ئۈنۈملۈك كونترول قىلغىلى بولىدۇ."
 }'
 
 # Legal interpretation document example
-curl -X POST "localhost:9200/uyghur_docs/_doc/6" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/6" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "مۈلۈك ۋارىسلىق قانۇنى چۈشەندۈرۈلۈشى",
   "content": "مۈلۈك ۋارىسلىق قانۇنى بويىچە، مەرھۇمنىڭ ۋەسىيىتى بولمىغان ئەھۋالدا، مۈلكى قانۇنىي ۋارىسلارغا تەقسىم قىلىنىدۇ. بىرىنچى دەرىجىلىك ۋارىسلار جۈملىسىگە پەرزەنتلەر، ئايال-خوتۇن ۋە ئاتا-ئانىلار كىرىدۇ. ئەگەر بىرىنچى دەرىجىلىك ۋارىسلار بولمىسا، ئىككىنچى دەرىجىلىك ۋارىسلار مۈلۈككە ۋارىسلىق قىلىدۇ."
@@ -234,7 +254,9 @@ curl -X POST "localhost:9200/uyghur_docs/_doc/6" -H "Content-Type: application/j
 Analyzing the title field:
 
 ```bash
-curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "field": "title",
   "text": "يېزىلاردىكى ئوقۇتۇش"
@@ -244,7 +266,9 @@ curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application
 Analyzing specific words in the content field:
 
 ```bash
-curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "field": "content",
   "text": "ئوقۇغۇچىلارنىڭ"
@@ -257,7 +281,9 @@ curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application
 
 ```bash
 # Simple word matching
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
@@ -273,7 +299,9 @@ Even when searching for root forms, it can match words with various suffixes:
 
 ```bash
 # Searching for "يېزا" (village) can match "يېزىلاردىكى" (in villages)
-curl -X GET "localhost:9200/uyghur_advanced/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_advanced/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
@@ -286,7 +314,9 @@ curl -X GET "localhost:9200/uyghur_advanced/_search" -H "Content-Type: applicati
 ### Phrase Search
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match_phrase": {
@@ -299,7 +329,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 ### Compound Queries
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "bool": {
@@ -319,7 +351,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 ### Highlighting
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
@@ -341,7 +375,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 Combining standard tokenizer with Uyghur word form filters:
 
 ```bash
-curl -X PUT "localhost:9200/custom_uyghur" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/custom_uyghur" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -365,7 +401,9 @@ curl -X PUT "localhost:9200/custom_uyghur" -H "Content-Type: application/json" -
 Adding Uyghur synonym support:
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_synonyms" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_synonyms" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -398,7 +436,9 @@ curl -X PUT "localhost:9200/uyghur_synonyms" -H "Content-Type: application/json"
 ### Index Settings Optimization
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_optimized" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_optimized" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "index": {
@@ -424,7 +464,9 @@ curl -X PUT "localhost:9200/uyghur_optimized" -H "Content-Type: application/json
 **Solution**: Use the `_analyze` API to check how text is tokenized, ensuring the query uses the correct analyzer.
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_original_analyzer",
   "text": "Your keywords"

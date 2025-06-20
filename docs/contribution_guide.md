@@ -1,39 +1,210 @@
-## Contribution Guide
+# Contribution Guide
 
-To ensure the continuous improvement and adaptation of this plugin to more use cases, we encourage community members to actively contribute. Below is a contribution guide, providing some basic directions and suggestions to help interested contributors effectively contribute to the project.
+Thank you for your interest in contributing to the Elasticsearch Uyghur Analyzer Plugin! This guide will help you get started with contributing to the project.
 
-### Ways to Contribute
+## Getting Started
 
-#### Enrich Dictionary Content:
-- The dictionary is a core component of the text analysis plugin. Contributors can add new entries, update existing entries, or optimize the segmentation method to improve the accuracy and efficiency of the analysis.
+### Prerequisites
 
-#### Enhance Existing Features:
-- Optimize code, improve performance, fix known bugs, or add new features such as new analyzers or token filters. All of these contributions are highly welcome.
+- JDK 17 or higher
+- Git
+- Basic understanding of Elasticsearch plugins
+- Familiarity with Java and Gradle
 
-#### Improve Compatibility:
-- Test the plugin to ensure its stable operation across different versions of Elasticsearch. Contributors can help the plugin support earlier versions of Elasticsearch or ensure compatibility with upcoming versions.
+### Development Environment Setup
 
-#### Improve Documentation:
-- Enhance the clarity and completeness of the documentation, helping new users better understand and use the plugin. This includes updating the README file, adding more examples, or writing detailed usage guides.
+1. **Fork and Clone**:
+   ```bash
+   git clone https://github.com/your-username/elastic-uyghur-analyzer.git
+   cd elastic-uyghur-analyzer
+   ```
 
-#### Community Support:
-- Answer questions from other users on GitHub, forums, or social media, provide technical support, or organize online meetings to discuss the use and development of the plugin.
+2. **Build the Project**:
+   ```bash
+   ./gradlew clean build
+   ```
 
-### How to Start
+3. **Run Tests**:
+   ```bash
+   ./gradlew test
+   ```
 
-#### Understand the Project Structure:
-- Clone the project code and familiarize yourself with the project structure and existing code implementation.
+## Ways to Contribute
 
-#### Participate in Discussions:
-- Join the project's mailing list or social media groups and actively participate in discussions about the project.
+### 1. Dictionary Enhancement
 
-#### Submit Issues:
-- If you find bugs or have new feature suggestions, submit them through the GitHub Issue tracker.
+The plugin uses several dictionary files located in `src/main/resources/dictionaries/`:
+- `custom_dictionary.txt`: User-defined vocabulary (highest priority)
+- `thuuy_morph_raw.txt`: THU morphological dataset
 
-#### Submit Pull Requests:
-- After modifying the code, submit a Pull Request. Make sure your code meets the project's coding standards and passes all tests.
+**How to contribute**:
+- Add new vocabulary entries to `custom_dictionary.txt`
+- Follow the format: `word. root suffix1 suffix2`
+- Test your additions with the morphological analyzer
 
-#### Follow Contribution Agreement:
-- Before submitting code, ensure you have read and agreed to the project's contribution agreement.
+### 2. Code Improvements
 
-By following these guidelines, we hope to inspire and help community members to contribute in various ways. Whether it's technical contributions or community support, every effort is crucial to the success of the project.
+#### Areas for Enhancement:
+- **Performance optimization** in `RuleBasedMorphologyAnalyzer`
+- **New analysis strategies** with different confidence levels
+- **Bug fixes** in morphological analysis logic
+- **New token filters** for specific use cases
+
+#### Code Standards:
+- Follow Java naming conventions
+- Add JavaDoc comments for public methods
+- Include unit tests for new features
+- Maintain backward compatibility
+
+### 3. Testing and Quality Assurance
+
+- Test with different Elasticsearch versions (8.7.0+)
+- Add test cases for edge cases in Uyghur morphology
+- Performance testing with large text corpora
+- Integration testing with real-world scenarios
+
+### 4. Documentation
+
+- Update README files for new features
+- Add examples in `docs/` directory
+- Improve code comments and JavaDoc
+- Create tutorials for specific use cases
+
+## Development Workflow
+
+### 1. Issue Creation
+
+Before starting work:
+- Check existing issues on GitHub
+- Create a new issue describing the problem or feature
+- Discuss the approach with maintainers
+
+### 2. Branch Strategy
+
+```bash
+# Create a feature branch
+git checkout -b feature/your-feature-name
+
+# Or for bug fixes
+git checkout -b fix/issue-description
+```
+
+### 3. Code Changes
+
+- Make focused commits with clear messages
+- Follow conventional commit format:
+  ```
+  feat: add new morphological analysis strategy
+  fix: resolve dictionary parsing issue
+  docs: update installation guide
+  ```
+
+### 4. Testing
+
+Before submitting:
+```bash
+# Run all tests
+./gradlew test
+
+# Build the plugin
+./gradlew clean build
+
+# Test with Elasticsearch (optional)
+# Follow the build guide to test in Docker
+```
+
+### 5. Pull Request
+
+1. **Push your branch**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+2. **Create Pull Request**:
+   - Use a clear title and description
+   - Reference related issues
+   - Include testing instructions
+   - Add screenshots if applicable
+
+3. **PR Template**:
+   ```markdown
+   ## Description
+   Brief description of changes
+
+   ## Type of Change
+   - [ ] Bug fix
+   - [ ] New feature
+   - [ ] Documentation update
+   - [ ] Performance improvement
+
+   ## Testing
+   - [ ] Tests pass locally
+   - [ ] Added new tests for changes
+   - [ ] Tested with Elasticsearch
+
+   ## Related Issues
+   Fixes #issue_number
+   ```
+
+## Code Review Process
+
+1. **Automated Checks**: All PRs must pass CI/CD checks
+2. **Peer Review**: At least one maintainer review required
+3. **Testing**: Changes must include appropriate tests
+4. **Documentation**: Update docs for user-facing changes
+
+## Specific Contribution Areas
+
+### Dictionary Contributions
+
+1. **Custom Dictionary Entries**:
+   - Modern technical terms
+   - Domain-specific vocabulary
+   - Regional variations
+
+2. **Format Requirements**:
+   ```
+   # Format: word. root suffix1 suffix2
+   تېخنىكا. تېخنىكا
+   كومپيۇتېر. كومپيۇتېر
+   ```
+
+### Algorithm Improvements
+
+1. **Morphological Analysis**:
+   - Improve confidence scoring
+   - Add new analysis strategies
+   - Optimize performance
+
+2. **Pattern Recognition**:
+   - Enhance suffix detection
+   - Improve vowel harmony rules
+   - Add new morphological patterns
+
+## Community Guidelines
+
+- **Be respectful** in all interactions
+- **Be patient** with review processes
+- **Be collaborative** in discussions
+- **Be thorough** in testing and documentation
+
+## Getting Help
+
+- **GitHub Issues**: For bugs and feature requests
+- **Discussions**: For questions and general discussion
+- **Email**: Contact maintainers directly for sensitive issues
+
+## Recognition
+
+Contributors will be recognized in:
+- README contributors section
+- Release notes for significant contributions
+- GitHub contributor statistics
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+
+---
+
+Thank you for contributing to the Elasticsearch Uyghur Analyzer Plugin!

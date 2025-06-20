@@ -23,6 +23,9 @@ import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.uyghur.morphology.analyzer.MorphologyAnalysisResult;
+import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,19 +33,24 @@ import java.util.Map;
 public class UyghurWordTokenFilter extends TokenFilter {
     private final CharTermAttribute termAttr = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offsetAttr = addAttribute(OffsetAttribute.class);
-    private final Map<String, String[]> dictionary;
+    private final RuleBasedMorphologyAnalyzer morphologyAnalyzer;
+    private final DictionaryView viewType;
     private String[] currentParts;
     private int currentPartIndex;
     private int currentStartOffset;
     private int currentEndOffset;
 
-    protected UyghurWordTokenFilter(TokenStream input, Map<String, String[]> dictionary) {
+    protected UyghurWordTokenFilter(TokenStream input, RuleBasedMorphologyAnalyzer analyzer, DictionaryView viewType) {
         super(input);
-        this.dictionary = dictionary;
+        this.morphologyAnalyzer = analyzer;
+        this.viewType = viewType;
     }
+    
+
 
     @Override
     public final boolean incrementToken() throws IOException {
+        // 如果当前有分割结果待输出，继续输出
         if (currentParts != null && currentPartIndex < currentParts.length) {
             clearAttributes();
             termAttr.append(currentParts[currentPartIndex]);
@@ -53,15 +61,27 @@ public class UyghurWordTokenFilter extends TokenFilter {
             return true;
         }
 
+        // 获取下一个token
         if (input.incrementToken()) {
             String token = termAttr.toString();
-            if (dictionary.containsKey(token)) {
-                currentParts = dictionary.get(token);
-                currentPartIndex = 0;
-                currentStartOffset = offsetAttr.startOffset();
-                currentEndOffset = offsetAttr.endOffset();
-                return incrementToken();
+            
+            // 使用形态学分析器进行分析
+            if (morphologyAnalyzer != null) {
+                MorphologyAnalysisResult result = morphologyAnalyzer.analyze(token);
+                
+                if (result != null && result.getMorphemes().size() > 1) {
+                    // 有分析结果，进行分割
+                    currentParts = result.getMorphemes().toArray(new String[0]);
+                    currentPartIndex = 0;
+                    currentStartOffset = offsetAttr.startOffset();
+                    currentEndOffset = offsetAttr.endOffset();
+                    return incrementToken(); // 递归调用输出第一个分割部分
+                } else {
+                    // 没有分析结果或只有一个段，原样输出
+                    return true;
+                }
             } else {
+                // 没有形态学分析器，原样输出（不应该发生）
                 return true;
             }
         } else {

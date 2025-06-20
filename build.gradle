@@ -9,19 +9,36 @@ buildscript {
     }
 }
 
+apply plugin: 'java'
 apply plugin: 'elasticsearch.stable-esplugin'
 apply plugin: 'elasticsearch.yaml-rest-test'
+
+// Java版本配置
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
 
 esplugin {
     name 'uyghur-analyzer-plugin'
     description 'A morphology-based Uyghur language analyzer for Elasticsearch'
-    classname 'org.tocharian.UyghurAnalyzerPlugin' 
     licenseFile rootProject.file('LICENSE')
     noticeFile rootProject.file('NOTICE.txt')
 }
 
 group 'org.tocharian'
-version "${elasticsearchVersion}"
+version 'v2.0-es8.7+'
+
+// 自定义归档文件名
+tasks.withType(Zip) {
+    archiveBaseName = 'uyghur-analyzer-plugin'
+    archiveVersion = 'v2.0-es8.7+'
+}
 
 repositories {
     mavenLocal()

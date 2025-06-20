@@ -1,6 +1,6 @@
 # Build Guide for Elastic Uyghur Analyzer Plugin
 
-This document provides instructions for building, testing, and packaging the Elastic Uyghur Analyzer Plugin for Elasticsearch 8.7.0.
+This document provides instructions for building, testing, and packaging the Elastic Uyghur Analyzer Plugin for Elasticsearch 8.7.0+.
 
 ## Prerequisites
 
@@ -22,46 +22,35 @@ cd elastic-uyghur-analyzer
 
 ### Building the Plugin
 
-The plugin is configured to build against Elasticsearch 8.7.0 by default.
+The plugin is configured to build against Elasticsearch 8.7.0+ by default.
 
 ```bash
-./gradlew clean assemble
+./gradlew clean build
 ```
 
-The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-8.7.0.zip`.
+The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip`.
 
 ## Testing with Elasticsearch
 
 ### Start Elasticsearch with Docker
 
 ```bash
-# Create a Docker network for Elasticsearch and Kibana
-docker network create elastic
-
 # Start Elasticsearch
-docker run -d --name es -p 9200:9200 -p 9301:9300 \
+docker run -d --name es -p 9200:9200 -p 9300:9300 \
   -e "discovery.type=single-node" \
   -e "ELASTIC_PASSWORD=your_password" \
-  --net elastic \
   docker.elastic.co/elasticsearch/elasticsearch:8.7.0
 
 # Wait for Elasticsearch to start
 sleep 30
-
-# Set password for kibana_system user
-curl -X PUT "https://localhost:9200/_security/user/kibana_system/_password" \
-  -k -u elastic:your_password \
-  -H "Content-Type: application/json" \
-  -d '{"password": "your_password"}'
 ```
 
 ### Install the Plugin
 
 ```bash
 # Copy the plugin to the container and install it
-docker cp build/distributions/uyghur-analyzer-plugin-8.7.0.zip es:/tmp/
-docker exec -it -u root es bash -c "chown elasticsearch:root /tmp/uyghur-analyzer-plugin-8.7.0.zip && \
-  /usr/share/elasticsearch/bin/elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-8.7.0.zip"
+docker cp build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-v2.0-es8.7+.zip
 
 # Restart Elasticsearch to apply the plugin
 docker restart es
@@ -73,15 +62,13 @@ sleep 30
 docker exec es elasticsearch-plugin list
 ```
 
-### Start Kibana
+### Start Kibana (Optional)
 
 ```bash
-docker run -d --name kibi -p 5601:5601 \
-  -e "ELASTICSEARCH_HOSTS=https://es:9200" \
-  -e "ELASTICSEARCH_USERNAME=kibana_system" \
+docker run -d --name kibana -p 5601:5601 \
+  -e "ELASTICSEARCH_HOSTS=http://host.docker.internal:9200" \
+  -e "ELASTICSEARCH_USERNAME=elastic" \
   -e "ELASTICSEARCH_PASSWORD=your_password" \
-  -e "ELASTICSEARCH_SSL_VERIFICATIONMODE=none" \
-  --net elastic \
   docker.elastic.co/kibana/kibana:8.7.0
 ```
 
@@ -124,8 +111,20 @@ curl -k -X POST "https://localhost:9200/uyghur_test/_analyze" \
   -H "Content-Type: application/json" \
   -d '{
     "analyzer": "uyghur_analyzer",
-    "text": "مەن ئۇيغۇرچە سۆزلەيمەن"
+    "text": "ئورۇنلاشتۇرۇشلارنى تاكسىدا"
   }'
+```
+
+Expected output:
+```json
+{
+  "tokens": [
+    {"token": "ئورۇنلاشتۇرۇشلار", "start_offset": 0, "end_offset": 16, "type": "word", "position": 0},
+    {"token": "نى", "start_offset": 17, "end_offset": 19, "type": "word", "position": 1},
+    {"token": "تاكسى", "start_offset": 19, "end_offset": 24, "type": "word", "position": 2},
+    {"token": "دا", "start_offset": 25, "end_offset": 27, "type": "word", "position": 3}
+  ]
+}
 ```
 
 ## Accessing Kibana
@@ -137,7 +136,7 @@ Access Kibana in your browser at http://localhost:5601. Log in with:
 To access Kibana's terminal:
 
 ```bash
-docker exec -it --user root kibi /bin/bash
+docker exec -it --user root kibana /bin/bash
 ```
 
 ## Troubleshooting
@@ -176,11 +175,8 @@ docker logs es
 
 ```bash
 # Stop and remove containers
-docker stop es kibi
-docker rm es kibi
-
-# Remove network
-docker network rm elastic
+docker stop es kibana
+docker rm es kibana
 ```
 
 ## Additional Resources

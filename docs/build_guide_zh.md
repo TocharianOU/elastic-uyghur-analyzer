@@ -1,6 +1,6 @@
 # Elastic Uyghur Analyzer 插件构建指南
 
-本文档提供了构建、测试和打包 Elasticsearch 8.7.0 版本的 Elastic Uyghur Analyzer 插件的说明。
+本文档提供了构建、测试和打包 Elasticsearch 8.7.0+ 版本的 Elastic Uyghur Analyzer 插件的说明。
 
 ## 前提条件
 
@@ -22,46 +22,35 @@ cd elastic-uyghur-analyzer
 
 ### 构建插件
 
-该插件默认配置为针对 Elasticsearch 8.7.0 进行构建。
+该插件默认配置为针对 Elasticsearch 8.7.0+ 进行构建。
 
 ```bash
-./gradlew clean assemble
+./gradlew clean build
 ```
 
-插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-8.7.0.zip` 创建。
+插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip` 创建。
 
 ## 使用 Elasticsearch 进行测试
 
 ### 使用 Docker 启动 Elasticsearch
 
 ```bash
-# 为 Elasticsearch 和 Kibana 创建 Docker 网络
-docker network create elastic
-
 # 启动 Elasticsearch
-docker run -d --name es -p 9200:9200 -p 9301:9300 \
+docker run -d --name es -p 9200:9200 -p 9300:9300 \
   -e "discovery.type=single-node" \
   -e "ELASTIC_PASSWORD=your_password" \
-  --net elastic \
   docker.elastic.co/elasticsearch/elasticsearch:8.7.0
 
 # 等待 Elasticsearch 启动
 sleep 30
-
-# 为 kibana_system 用户设置密码
-curl -X PUT "https://localhost:9200/_security/user/kibana_system/_password" \
-  -k -u elastic:your_password \
-  -H "Content-Type: application/json" \
-  -d '{"password": "your_password"}'
 ```
 
 ### 安装插件
 
 ```bash
 # 将插件复制到容器并安装
-docker cp build/distributions/uyghur-analyzer-plugin-8.7.0.zip es:/tmp/
-docker exec -it -u root es bash -c "chown elasticsearch:root /tmp/uyghur-analyzer-plugin-8.7.0.zip && \
-  /usr/share/elasticsearch/bin/elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-8.7.0.zip"
+docker cp build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-v2.0-es8.7+.zip
 
 # 重启 Elasticsearch 以应用插件
 docker restart es
@@ -73,15 +62,13 @@ sleep 30
 docker exec es elasticsearch-plugin list
 ```
 
-### 启动 Kibana
+### 启动 Kibana（可选）
 
 ```bash
-docker run -d --name kibi -p 5601:5601 \
-  -e "ELASTICSEARCH_HOSTS=https://es:9200" \
-  -e "ELASTICSEARCH_USERNAME=kibana_system" \
+docker run -d --name kibana -p 5601:5601 \
+  -e "ELASTICSEARCH_HOSTS=http://host.docker.internal:9200" \
+  -e "ELASTICSEARCH_USERNAME=elastic" \
   -e "ELASTICSEARCH_PASSWORD=your_password" \
-  -e "ELASTICSEARCH_SSL_VERIFICATIONMODE=none" \
-  --net elastic \
   docker.elastic.co/kibana/kibana:8.7.0
 ```
 
@@ -124,8 +111,20 @@ curl -k -X POST "https://localhost:9200/uyghur_test/_analyze" \
   -H "Content-Type: application/json" \
   -d '{
     "analyzer": "uyghur_analyzer",
-    "text": "مەن ئۇيغۇرچە سۆزلەيمەن"
+    "text": "ئورۇنلاشتۇرۇشلارنى تاكسىدا"
   }'
+```
+
+预期输出：
+```json
+{
+  "tokens": [
+    {"token": "ئورۇنلاشتۇرۇشلار", "start_offset": 0, "end_offset": 16, "type": "word", "position": 0},
+    {"token": "نى", "start_offset": 17, "end_offset": 19, "type": "word", "position": 1},
+    {"token": "تاكسى", "start_offset": 19, "end_offset": 24, "type": "word", "position": 2},
+    {"token": "دا", "start_offset": 25, "end_offset": 27, "type": "word", "position": 3}
+  ]
+}
 ```
 
 ## 访问 Kibana
@@ -137,7 +136,7 @@ curl -k -X POST "https://localhost:9200/uyghur_test/_analyze" \
 要访问 Kibana 的终端：
 
 ```bash
-docker exec -it --user root kibi /bin/bash
+docker exec -it --user root kibana /bin/bash
 ```
 
 ## 故障排除
@@ -176,11 +175,8 @@ docker logs es
 
 ```bash
 # 停止并删除容器
-docker stop es kibi
-docker rm es kibi
-
-# 删除网络
-docker network rm elastic
+docker stop es kibana
+docker rm es kibana
 ```
 
 ## 其他资源

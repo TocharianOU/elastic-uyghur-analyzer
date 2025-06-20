@@ -33,7 +33,9 @@ Elastic Uyghur Analyzer 是专为维吾尔语文本分析设计的 Elasticsearch
 保留原始词形的同时提供形态分析，适合需要保持原始文本结构的场景。
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_original_analyzer",
   "text": "ئائىلىلەرنى"
@@ -72,7 +74,9 @@ curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
 将词分解为形态组件，适合需要更高召回率的搜索场景。
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_split_analyzer",
   "text": "ئائىلىلەرنى"
@@ -113,7 +117,9 @@ curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
 以下是一个可以直接使用的基本索引配置，适用于大多数维吾尔语文本处理场景：
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_docs" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -152,7 +158,9 @@ curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
 下面的配置展示了如何对同一字段同时应用两种分析器，以支持不同的搜索需求：
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_advanced" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_advanced" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -218,7 +226,9 @@ curl -X PUT "localhost:9200/uyghur_advanced" -H "Content-Type: application/json"
 以下是一个为维吾尔语的内容搜索网站实用索引配置：
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_docs" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "index": {
@@ -276,37 +286,49 @@ curl -X PUT "localhost:9200/uyghur_docs" -H "Content-Type: application/json" -d'
 ### 索引示例文档
 
 ```bash
-curl -X POST "localhost:9200/uyghur_docs/_doc/1" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/1" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "يۇقۇملۇق كېسەللەر توغرىسىدا",
   "content": "يۇقۇملۇق كېسەللەر ۋىرۇس، باكتېرىيە ياكى باشقا مىكروئورگانىزملار تەرىپىدىن كېلىپ چىقىدىغان كېسەللەر بولۇپ، بۇلار ئادەملەر ئارىسىدا ئاسانلا تارقىلىدۇ. بۇ خىل كېسەللەردىن ساقلىنىش ئۈچۈن شەخسىي پاكىزلىققا دىققەت قىلىش ۋە ۋاقتىدا ۋاكسىنا ئۇرۇش مۇھىم."
 }'
 
-curl -X POST "localhost:9200/uyghur_docs/_doc/2" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/2" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "يۈرەك كېسەللىكلىرىنىڭ دىئاگنوزى",
   "content": "يۈرەك كېسەللىكلىرىنى دىئاگنوز قىلىشتا ئېلېكتروكاردىئوگرام (ئې.ك.گ)، ئېكوكاردىئوگرافىيە ۋە قان تەكشۈرۈش قاتارلىق ئۇسۇللار قوللىنىلىدۇ. بېمارلاردا كۆكرەك ئاغرىقى، نەپەس قىسىش ياكى ھالسىزلىق ئالامەتلىرى كۆرۈلگەندە، دەرھال دوختۇرغا مۇراجىئەت قىلىش كېرەك."
 }'
 
-curl -X POST "localhost:9200/uyghur_docs/_doc/3" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/3" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "ئۆي ئىجارە كېلىشىمى",
   "content": "بۇ كېلىشىم ئۆي ئىگىسى ۋە ئىجارىكەش ئوتتۇرىسىدا تۈزۈلگەن بولۇپ، ئىجارە مۇددىتى، ئايلىق ئىجارە ھەققى، تۆلەم ئۇسۇلى ۋە تەرەپلەرنىڭ مەجبۇرىيەتلىرىنى بەلگىلەيدۇ. كېلىشىمنى بۇزغان تەرەپ قانۇن بويىچە جاۋابكارلىققا تارتىلىدۇ."
 }'
 
-curl -X POST "localhost:9200/uyghur_docs/_doc/4" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/4" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "جىنايى ئىشلار قانۇنى بويىچە ئەرز قىلىش جەريانى",
   "content": "جىنايى ئىشلار قانۇنى بويىچە ئەرز قىلىش جەريانىدا، دەۋاگەر دەلىل-ئىسپاتلارنى توپلاپ، ساقچى ئىدارىسىگە ياكى تەپتىش مەھكىمىسىگە مۇراجىئەت قىلىشى كېرەك. ئەرزنامە يېزىلغاندا ۋەقە جەريانى، ۋاقتى، ئورنى ۋە ئالاقىدار شەخسلەر توغرىسىدا تەپسىلىي مەلۇمات بېرىلىشى لازىم."
 }'
 
-curl -X POST "localhost:9200/uyghur_docs/_doc/5" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/5" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "قەنت كېسىلى ۋە ئۇنىڭ داۋالاش ئۇسۇللىرى ھەققىدە تەتقىقات",
   "content": "بۇ تەتقىقاتتا قەنت كېسىلىنىڭ ئۇيغۇر نوپۇسى ئارىسىدىكى تارقىلىشى ۋە ئۇنى داۋالاشنىڭ زامانىۋى ئۇسۇللىرى مۇھاكىمە قىلىنغان. تەتقىقات نەتىجىلىرى كۆرسەتكەندەك، كۈندىلىك تۇرمۇش ئادەتلىرىنى ئۆزگەرتىش، مۇۋاپىق بەدەن چېنىقتۇرۇش ۋە دورا داۋالاش ئارقىلىق قەنت كېسىلىنى ئۈنۈملۈك كونترول قىلغىلى بولىدۇ."
 }'
 
-curl -X POST "localhost:9200/uyghur_docs/_doc/6" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_doc/6" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "title": "مۈلۈك ۋارىسلىق قانۇنى چۈشەندۈرۈلۈشى",
   "content": "مۈلۈك ۋارىسلىق قانۇنى بويىچە، ۋاپات بولغۇچىنىڭ ۋەسىيىتى بولمىغان ئەھۋالدا، مۈلكى قانۇنىي ۋارىسلارغا تەقسىم قىلىنىدۇ. بىرىنچى دەرىجىلىك ۋارىسلار جۈملىسىگە پەرزەنتلەر، ئايال-خوتۇن ۋە ئاتا-ئانىلار كىرىدۇ. ئەگەر بىرىنچى دەرىجىلىك ۋارىسلار بولمىسا، ئىككىنچى دەرىجىلىك ۋارىسلار مۈلۈككە ۋارىسلىق قىلىدۇ."
@@ -318,7 +340,9 @@ curl -X POST "localhost:9200/uyghur_docs/_doc/6" -H "Content-Type: application/j
 分析标题字段：
 
 ```bash
-curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "field": "title",
   "text": "يېزىلاردىكى ئوقۇتۇش"
@@ -328,7 +352,9 @@ curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application
 分析内容字段中的特定词：
 
 ```bash
-curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_docs/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "field": "content",
   "text": "قانۇنى"
@@ -341,7 +367,9 @@ curl -X POST "localhost:9200/uyghur_docs/_analyze" -H "Content-Type: application
 
 ```bash
 # 简单词匹配
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
@@ -356,7 +384,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 即使搜索词根形式，也能匹配包含各种后缀的词：
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "multi_match": {
@@ -368,11 +398,12 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 '
 ```
 
-
 ### 复合查询
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "bool": {
@@ -392,7 +423,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 ### 高亮显示
 
 ```bash
-curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/json" -d'
+curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
@@ -414,7 +447,9 @@ curl -X GET "localhost:9200/uyghur_docs/_search" -H "Content-Type: application/j
 结合标准分词器和维吾尔语词形过滤器：
 
 ```bash
-curl -X PUT "localhost:9200/custom_uyghur" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/custom_uyghur" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -438,7 +473,9 @@ curl -X PUT "localhost:9200/custom_uyghur" -H "Content-Type: application/json" -
 添加维吾尔语同义词支持：
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_synonyms" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_synonyms" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
@@ -471,7 +508,9 @@ curl -X PUT "localhost:9200/uyghur_synonyms" -H "Content-Type: application/json"
 ### 索引设置优化
 
 ```bash
-curl -X PUT "localhost:9200/uyghur_optimized" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/uyghur_optimized" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "index": {
@@ -497,7 +536,9 @@ curl -X PUT "localhost:9200/uyghur_optimized" -H "Content-Type: application/json
 **解决方案**：使用 `_analyze` API 检查文本如何被分词，确保查询使用了正确的分析器。
 
 ```bash
-curl -X POST "localhost:9200/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "analyzer": "uyghur_original_analyzer",
   "text": "您的搜索词"

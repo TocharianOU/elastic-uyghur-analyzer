@@ -22,6 +22,7 @@ package org.tocharian;
 import org.apache.lucene.analysis.Analyzer;
 import org.elasticsearch.plugin.analysis.AnalyzerFactory;
 import org.elasticsearch.plugin.NamedComponent;
+import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
 
 import java.io.IOException;
 
@@ -32,9 +33,11 @@ public class UyghurOriginalAnalyzerFactory implements AnalyzerFactory {
     public UyghurOriginalAnalyzerFactory() {
         this.dictionaryLoader = new DictionaryLoader();
         try {
-            dictionaryLoader.initializeFromResource("/ug_mor_original.txt");
+            // 使用统一词典系统，设置为Original视图
+            dictionaryLoader.setDictionaryView(DictionaryView.ORIGINAL);
+            dictionaryLoader.initializeFromResource("/dictionaries/thuuy_morph_raw.txt");
         } catch (IOException e) {
-            throw new RuntimeException("Initialization Failed: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize Uyghur Original Analyzer: " + e.getMessage(), e);
         }
     }
 

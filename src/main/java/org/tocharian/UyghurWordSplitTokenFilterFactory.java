@@ -22,25 +22,26 @@ package org.tocharian;
 import org.apache.lucene.analysis.TokenStream;
 import org.elasticsearch.plugin.analysis.TokenFilterFactory;
 import org.elasticsearch.plugin.NamedComponent;
+import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
 import java.io.IOException; 
 
 @NamedComponent(value = "uyghur_word_split")
 public class UyghurWordSplitTokenFilterFactory implements TokenFilterFactory {
-    private final DictionaryLoader dictionaryLoader;
+    private final RuleBasedMorphologyAnalyzer morphologyAnalyzer;
 
     public UyghurWordSplitTokenFilterFactory() {
-        this.dictionaryLoader = new DictionaryLoader();
         try {
-            if (dictionaryLoader.getDictionary().isEmpty()) {
-                dictionaryLoader.initializeFromResource("/ug_mor_split.txt");
-            }
+            // 创建并初始化形态学分析器
+            this.morphologyAnalyzer = new RuleBasedMorphologyAnalyzer();
+            this.morphologyAnalyzer.initialize();
         } catch (IOException e) {
-            throw new RuntimeException("Initialization Failed: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to initialize morphology analyzer: " + e.getMessage(), e);
         }
     }
 
     @Override
     public TokenStream create(TokenStream tokenStream) {
-        return new UyghurWordTokenFilter(tokenStream, dictionaryLoader.getDictionary());
+        return new UyghurWordTokenFilter(tokenStream, morphologyAnalyzer, DictionaryView.SPLIT);
     }
 }

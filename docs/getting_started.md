@@ -1,27 +1,47 @@
-# Quick Start Guide for Elastic Uyghur Analyzer Plugin
+# Elasticsearch Uyghur Analyzer Plugin Quick Start Guide
 
-This guide provides quick installation and usage instructions for the Elastic Uyghur Analyzer Plugin, helping you implement Uyghur text analysis in Elasticsearch.
+This guide provides quick installation and usage instructions for the Elasticsearch Uyghur Analyzer Plugin, helping you implement advanced Uyghur text analysis and morphological processing in Elasticsearch.
+
+## Plugin Features
+
+- **Unified Dictionary System**: Integrates THU morphological dataset and custom dictionary
+- **Intelligent Morphological Analysis**: Multi-layered analysis strategies supporting unknown word processing
+- **Dual-view Analysis**: Original form restoration and modern form segmentation
+- **High-performance Processing**: Hash-based fast vocabulary lookup
+- **Extensible Architecture**: Supports custom vocabulary and analysis strategies
 
 ## Compatibility
 
-- Elasticsearch 8.7.0
-- Java 17 or later
+- **Elasticsearch**: 8.7+
+- **Java**: 17 or higher
+- **Memory**: Recommend at least 64MB for dictionary loading
+- **Storage**: About 50MB for plugin and dictionary files
 
-## Installing the Plugin
+## Building and Installing the Plugin
+
+### Building from Source
+
+1. **Clone the project**:
+   ```bash
+   git clone https://github.com/your-repo/elastic-uyghur-analyzer.git
+   cd elastic-uyghur-analyzer
+   ```
+
+2. **Build the plugin**:
+   ```bash
+   ./gradlew clean build
+   ```
+   
+   After building, the plugin file is located in the `build/distributions/` directory.
 
 ### Method 1: Direct Installation (for existing Elasticsearch environments)
 
-1. Download the plugin ZIP file:
+1. **Install the plugin**:
    ```bash
-   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v8.7.0/uyghur-analyzer-plugin-8.7.0.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin.zip
    ```
 
-2. Install using the Elasticsearch plugin manager:
-   ```bash
-   bin/elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-8.7.0.zip
-   ```
-
-3. Restart Elasticsearch:
+2. **Restart Elasticsearch**:
    ```bash
    # For systemd-based systems
    systemctl restart elasticsearch
@@ -32,22 +52,21 @@ This guide provides quick installation and usage instructions for the Elastic Uy
 
 ### Method 2: Docker Installation
 
-1. Start an Elasticsearch container:
+1. **Start an Elasticsearch container**:
    ```bash
    docker run -d --name es -p 9200:9200 -p 9300:9300 \
      -e "discovery.type=single-node" \
      -e "ELASTIC_PASSWORD=your_password" \
-     docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+     docker.elastic.co/elasticsearch/elasticsearch:8.11.0
    ```
 
-2. Copy the plugin to the container and install it:
+2. **Copy the plugin to the container and install it**:
    ```bash
-   docker cp uyghur-analyzer-plugin-8.7.0.zip es:/tmp/
-   docker exec -it -u root es bash -c "chown elasticsearch:root /tmp/uyghur-analyzer-plugin-8.7.0.zip && \
-     /usr/share/elasticsearch/bin/elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-8.7.0.zip"
+   docker cp build/distributions/uyghur-analyzer-plugin.zip es:/tmp/
+   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin.zip
    ```
 
-3. Restart the container:
+3. **Restart the container**:
    ```bash
    docker restart es
    ```
@@ -57,136 +76,234 @@ This guide provides quick installation and usage instructions for the Elastic Uy
 Check that the plugin is installed correctly:
 
 ```bash
-bin/elasticsearch-plugin list
+elasticsearch-plugin list
 # Or in Docker
 docker exec es elasticsearch-plugin list
 ```
 
 You should see `uyghur-analyzer-plugin` in the list.
 
-## Using the Plugin
+## Basic Usage
 
-### Creating an Index with the Uyghur Analyzer
-
-```bash
-curl -X PUT "localhost:9200/uyghur_index" -H "Content-Type: application/json" -d'
-{
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "uyghur_analyzer": {
-          "type": "uyghur_original_analyzer"
-        }
-      }
-    }
-  },
-  "mappings": {
-    "properties": {
-      "content": {
-        "type": "text",
-        "analyzer": "uyghur_analyzer"
-      }
-    }
-  }
-}'
-```
-
-If security is enabled, add authentication:
+### Creating an Index with Uyghur Analyzers
 
 ```bash
 curl -k -X PUT "https://localhost:9200/uyghur_index" \
   -u elastic:your_password \
-  -H "Content-Type: application/json" \
-  -d'{
+  -H "Content-Type: application/json" -d'
+{
   "settings": {
     "analysis": {
       "analyzer": {
-        "uyghur_analyzer": {
+        "uyghur_original": {
           "type": "uyghur_original_analyzer"
+        },
+        "uyghur_split": {
+          "type": "uyghur_split_analyzer"
         }
       }
     }
   },
   "mappings": {
     "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "uyghur_split"
+      },
       "content": {
         "type": "text",
-        "analyzer": "uyghur_analyzer"
+        "analyzer": "uyghur_original"
       }
     }
   }
 }'
 ```
 
-### Testing the Analyzer
+### Testing Analyzer Effects
 
+**Test Original Analyzer** (vowel weakening restoration):
 ```bash
-curl -X POST "localhost:9200/uyghur_index/_analyze" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_analyzer",
-  "text": "مەن ئۇيغۇرچە سۆزلەيمەن"
+  "analyzer": "uyghur_original",
+  "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
 
-### Indexing Documents
-
+**Test Split Analyzer** (modern form preservation):
 ```bash
-curl -X POST "localhost:9200/uyghur_index/_doc" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
-  "content": "يېزىلاردىكى ئېشىنچا ئەمگەكچىلەرنى"
+  "analyzer": "uyghur_split",
+  "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
 
-### Searching Documents
+**Test Morphological Analysis**:
+```bash
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "analyzer": "uyghur_split",
+  "text": "ئورۇنلاشتۇرۇشلارنى تاكسىدا"
+}'
+```
+
+### Indexing Uyghur Documents
 
 ```bash
-curl -X GET "localhost:9200/uyghur_index/_search" -H "Content-Type: application/json" -d'
+curl -k -X POST "https://localhost:9200/uyghur_index/_doc" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "title": "تېخنىكا تەرەققىياتى",
+  "content": "كومپيۇتېر تېخنىكىسىنىڭ تەرەققىياتى بىلەن ئىنسانلارنىڭ تۇرمۇش سۈپىتى ياخشىلاندى"
+}'
+```
+
+```bash
+curl -k -X POST "https://localhost:9200/uyghur_index/_doc" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "title": "مائارىپ ئىشلىرى",
+  "content": "مۇئەللىملار ۋە ئوقۇغۇچىلار ئارىسىدىكى ئالاقە ناھايىتى مۇھىم"
+}'
+```
+
+### Searching Uyghur Documents
+
+**Basic Search**:
+```bash
+curl -k -X GET "https://localhost:9200/uyghur_index/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "query": {
     "match": {
-      "content": "يېزا"
+      "content": "تېخنىكا"
     }
   }
 }'
 ```
 
-## Available Analyzers and Filters
+**Multi-field Search**:
+```bash
+curl -k -X GET "https://localhost:9200/uyghur_index/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "query": {
+    "multi_match": {
+      "query": "مۇئەللىم",
+      "fields": ["title", "content"]
+    }
+  }
+}'
+```
 
-### Analyzers
+**Morphological Matching Search**:
+```bash
+curl -k -X GET "https://localhost:9200/uyghur_index/_search" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "query": {
+    "match": {
+      "content": "ياز"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "content": {}
+    }
+  }
+}'
+```
 
-1. `uyghur_original_analyzer` - Preserves original word forms while providing morphological analysis
-2. `uyghur_split_analyzer` - Splits words into morphological components
+## Analyzer Details
+
+### Available Analyzers
+
+1. **`uyghur_original_analyzer`**
+   - **Function**: Provides historical forms with vowel weakening restoration
+   - **Use Cases**: Academic research, historical text analysis
+   - **Example**: `يېزىش` → `يازىش`
+
+2. **`uyghur_split_analyzer`**
+   - **Function**: Intelligent morphology-based segmentation preserving modern forms
+   - **Use Cases**: Modern text search, content analysis
+   - **Example**: `تاكسىدا` → `تاكسى` + `دا`
 
 ### Token Filters
 
-1. `uyghur_word_original` - Token filter for original word forms
-2. `uyghur_word_split` - Token filter for split word forms
+1. **`uyghur_word_original`** - Token filter for original forms
+2. **`uyghur_word_split`** - Token filter for split forms
 
-### Custom Analyzer Example
+### Custom Analyzer Configuration
 
 ```bash
-curl -X PUT "localhost:9200/custom_index" -H "Content-Type: application/json" -d'
+curl -k -X PUT "https://localhost:9200/custom_uyghur_index" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
 {
   "settings": {
     "analysis": {
       "analyzer": {
-        "my_custom_analyzer": {
+        "my_uyghur_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
-          "filter": ["uyghur_word_original"]
+          "filter": [
+            "lowercase",
+            "uyghur_word_split"
+          ]
         }
       }
     }
   },
   "mappings": {
     "properties": {
-      "custom_content": {
+      "text": {
         "type": "text",
-        "analyzer": "my_custom_analyzer"
+        "analyzer": "my_uyghur_analyzer"
       }
     }
   }
 }'
+```
+
+## Advanced Features
+
+### Custom Dictionary Management
+
+1. **View current custom dictionary**:
+   ```bash
+   # Dictionary file is located inside the plugin
+   # src/main/resources/dictionaries/custom_dictionary.txt
+   ```
+
+2. **Add custom vocabulary** (requires plugin rebuild):
+   ```
+   # Add to custom_dictionary.txt
+   ئەپ
+   ئەپ. لار
+   ۋېبسايت
+   ۋېبسايت. تا
+   ```
+
+### Morphological Analysis Testing
+
+Use the built-in tester to verify morphological analysis effects:
+
+```bash
+# Compile and run interactive tester
+./gradlew compileJava
+java -cp build/classes/java/main:build/resources/main org.uyghur.morphology.InteractiveMorphologyTester
 ```
 
 ## Troubleshooting
@@ -194,25 +311,172 @@ curl -X PUT "localhost:9200/custom_index" -H "Content-Type: application/json" -d
 ### Common Issues
 
 1. **Plugin installation fails**:
-   - Check if Elasticsearch version is 8.7.0
-   - Ensure you're using Java 17
-   - Check Elasticsearch logs
+   ```
+   Error: java.nio.file.AccessDeniedException
+   Solution: Use root privileges or check file permissions
+   ```
 
-2. **Analyzer doesn't work**:
-   - Confirm the plugin is installed correctly
-   - Check analyzer configuration in index settings
-   - Try rebuilding the index
+2. **Dictionary loading fails**:
+   ```
+   Error: Dictionary file not found
+   Solution: Check if dictionary files are properly packaged in plugin
+   ```
 
-3. **Search results not as expected**:
-   - Use the `_analyze` API to check how text is tokenized
-   - Adjust queries to match tokenization results
+3. **Analyzer doesn't work**:
+   ```
+   Error: Unknown analyzer type
+   Solution: Confirm plugin is correctly installed and restart Elasticsearch
+   ```
+
+4. **Out of memory**:
+   ```
+   Error: OutOfMemoryError during dictionary loading
+   Solution: Increase Elasticsearch heap memory settings
+   ```
+
+### Debugging and Logging
+
+Enable verbose logging:
+
+```yaml
+# Add to elasticsearch.yml
+logger.org.tocharian: DEBUG
+logger.org.uyghur: DEBUG
+```
+
+View analysis process:
+```bash
+curl -k -X POST "https://localhost:9200/_analyze?explain=true" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "analyzer": "uyghur_split",
+  "text": "تېخنىكىلىق"
+}'
+```
+
+## Performance Optimization
+
+### Memory Configuration
+
+```yaml
+# elasticsearch.yml
+# Allocate sufficient memory for dictionary loading
+-Xms2g
+-Xmx2g
+```
+
+### Index Optimization
+
+```bash
+# Create high-performance index configuration
+curl -k -X PUT "https://localhost:9200/optimized_uyghur_index" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "fast_uyghur": {
+          "type": "uyghur_split_analyzer"
+        }
+      }
+    }
+  }
+}'
+```
+
+## Practical Application Examples
+
+### News Search System
+
+```bash
+# Create news index
+curl -k -X PUT "https://localhost:9200/uyghur_news" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "news_analyzer": {
+          "type": "uyghur_split_analyzer"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "news_analyzer"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "news_analyzer"
+      },
+      "category": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date"
+      }
+    }
+  }
+}'
+```
+
+### Academic Literature Search
+
+```bash
+# Create academic literature index
+curl -k -X PUT "https://localhost:9200/uyghur_academic" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "academic_analyzer": {
+          "type": "uyghur_original_analyzer"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "academic_analyzer"
+      },
+      "abstract": {
+        "type": "text",
+        "analyzer": "academic_analyzer"
+      },
+      "keywords": {
+        "type": "text",
+        "analyzer": "keyword"
+      }
+    }
+  }
+}'
+```
 
 ## Additional Resources
 
-- [Build Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/build_guide.md)
-- [Usage Guide](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/tutorial.md)
-- [FAQ](https://github.com/TocharianOU/elastic-uyghur-analyzer/blob/main/docs/faq.md)
+- [Dictionary Explanation](dictionary_explanation.md) - Detailed dictionary system documentation
+- [Build Guide](build_guide.md) - Complete build and development guide
+- [Tutorial](tutorial.md) - In-depth usage tutorial
+- [FAQ](faq.md) - Detailed FAQ and troubleshooting
 
-## Support
+## Technical Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues) on GitHub.
+- **GitHub Issues**: [Submit Issues](https://github.com/your-repo/elastic-uyghur-analyzer/issues)
+- **Documentation**: Check project documentation for more technical details
+- **Community**: Participate in open source community discussions and contributions
+
+---
+
+Start using the Elasticsearch Uyghur Analyzer Plugin and experience advanced Uyghur text processing capabilities!
