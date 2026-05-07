@@ -21,7 +21,7 @@
 
 2. **构建项目**：
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 3. **运行测试**：
@@ -107,7 +107,7 @@ git checkout -b fix/issue-description
 ./gradlew test
 
 # 构建插件
-./gradlew clean build
+./gradlew clean check
 
 # 使用 Elasticsearch 测试（可选）
 # 按照构建指南在 Docker 中测试

@@ -25,10 +25,10 @@ cd elastic-uyghur-analyzer
 该插件默认配置为针对 Elasticsearch 8.7.0+ 进行构建。
 
 ```bash
-./gradlew clean build
+./gradlew clean check
 ```
 
-插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip` 创建。
+插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip` 创建。
 
 ## 使用 Elasticsearch 进行测试
 
@@ -49,8 +49,8 @@ sleep 30
 
 ```bash
 # 将插件复制到容器并安装
-docker cp build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.0.0-es8.zip
 
 # 重启 Elasticsearch 以应用插件
 docker restart es
@@ -188,4 +188,3 @@ docker rm es kibana
 ## 支持
 
 如果您遇到任何问题或有疑问，请在 GitHub 上[提交问题](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues)。
-```

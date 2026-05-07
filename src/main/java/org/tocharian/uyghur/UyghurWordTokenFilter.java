@@ -17,28 +17,30 @@
  * under the License.
  */
 
-package org.tocharian;
+package org.tocharian.uyghur;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
-import org.uyghur.morphology.analyzer.MorphologyAnalysisResult;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.tocharian.uyghur.morphology.analyzer.MorphologyAnalysisResult;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
 
 import java.io.IOException;
-import java.util.Map;
 
 public class UyghurWordTokenFilter extends TokenFilter {
     private final CharTermAttribute termAttr = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offsetAttr = addAttribute(OffsetAttribute.class);
+    private final PositionIncrementAttribute positionIncrementAttr = addAttribute(PositionIncrementAttribute.class);
     private final RuleBasedMorphologyAnalyzer morphologyAnalyzer;
     private final DictionaryView viewType;
     private String[] currentParts;
     private int currentPartIndex;
     private int currentStartOffset;
     private int currentEndOffset;
+    private int currentPositionIncrement;
 
     protected UyghurWordTokenFilter(TokenStream input, RuleBasedMorphologyAnalyzer analyzer, DictionaryView viewType) {
         super(input);
@@ -55,8 +57,12 @@ public class UyghurWordTokenFilter extends TokenFilter {
             clearAttributes();
             termAttr.append(currentParts[currentPartIndex]);
             int length = currentParts[currentPartIndex].length();
-            offsetAttr.setOffset(currentStartOffset, currentStartOffset + length);
-            currentStartOffset += length + 1; // +1 to account for the space or punctuation
+            int partEndOffset = currentPartIndex == currentParts.length - 1
+                ? currentEndOffset
+                : Math.min(currentStartOffset + length, currentEndOffset);
+            offsetAttr.setOffset(currentStartOffset, partEndOffset);
+            positionIncrementAttr.setPositionIncrement(currentPartIndex == 0 ? currentPositionIncrement : 1);
+            currentStartOffset = partEndOffset;
             currentPartIndex++;
             return true;
         }
@@ -67,7 +73,7 @@ public class UyghurWordTokenFilter extends TokenFilter {
             
             // 使用形态学分析器进行分析
             if (morphologyAnalyzer != null) {
-                MorphologyAnalysisResult result = morphologyAnalyzer.analyze(token);
+                MorphologyAnalysisResult result = morphologyAnalyzer.analyze(token, viewType);
                 
                 if (result != null && result.getMorphemes().size() > 1) {
                     // 有分析结果，进行分割
@@ -75,6 +81,7 @@ public class UyghurWordTokenFilter extends TokenFilter {
                     currentPartIndex = 0;
                     currentStartOffset = offsetAttr.startOffset();
                     currentEndOffset = offsetAttr.endOffset();
+                    currentPositionIncrement = positionIncrementAttr.getPositionIncrement();
                     return incrementToken(); // 递归调用输出第一个分割部分
                 } else {
                     // 没有分析结果或只有一个段，原样输出

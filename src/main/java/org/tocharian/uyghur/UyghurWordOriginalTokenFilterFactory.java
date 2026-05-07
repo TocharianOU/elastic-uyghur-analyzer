@@ -17,28 +17,23 @@
  * under the License.
  */
 
-package org.tocharian;
+package org.tocharian.uyghur;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-
+import org.elasticsearch.plugin.analysis.TokenFilterFactory;
+import org.elasticsearch.plugin.NamedComponent;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
 import java.io.IOException;
-import java.util.Map;
 
-public class UyghurAnalyzer extends Analyzer {
-    private final Map<String, String[]> dictionary;
+@NamedComponent(value = "uyghur_word_original")
+public class UyghurWordOriginalTokenFilterFactory implements TokenFilterFactory {
     private final RuleBasedMorphologyAnalyzer morphologyAnalyzer;
-    private final DictionaryView viewType;
 
-    public UyghurAnalyzer(Map<String, String[]> dictionary) {
-        this.dictionary = dictionary;
-        this.morphologyAnalyzer = new RuleBasedMorphologyAnalyzer();
-        this.viewType = DictionaryView.SPLIT; // 默认使用Split视图
-        
+    public UyghurWordOriginalTokenFilterFactory() {
         try {
+            // 创建并初始化形态学分析器
+            this.morphologyAnalyzer = new RuleBasedMorphologyAnalyzer();
             this.morphologyAnalyzer.initialize();
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize morphology analyzer: " + e.getMessage(), e);
@@ -46,9 +41,7 @@ public class UyghurAnalyzer extends Analyzer {
     }
 
     @Override
-    protected TokenStreamComponents createComponents(String fieldName) {
-        StandardTokenizer tokenizer = new StandardTokenizer();
-        TokenStream tokenStream = new UyghurWordTokenFilter(tokenizer, morphologyAnalyzer, viewType);
-        return new TokenStreamComponents(tokenizer, tokenStream);
+    public TokenStream create(TokenStream tokenStream) {
+        return new UyghurWordTokenFilter(tokenStream, morphologyAnalyzer, DictionaryView.ORIGINAL);
     }
 }

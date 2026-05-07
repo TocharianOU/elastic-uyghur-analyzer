@@ -1,9 +1,9 @@
-package org.uyghur.morphology;
+package org.tocharian.uyghur.morphology;
 
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
-import org.uyghur.morphology.analyzer.MorphologyAnalysisResult;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.tocharian.uyghur.morphology.analyzer.MorphologyAnalysisResult;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -227,4 +227,4 @@ public class TokenizationTester {
         System.out.println("原始THU数据: " + stats.get("rawThuData") + " 条");
         System.out.println();
     }
-} 
+}

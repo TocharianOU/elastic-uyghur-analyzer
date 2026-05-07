@@ -12,10 +12,12 @@
 
 ## 兼容性
 
-- **Elasticsearch**: 8.7+
+- **Elasticsearch**: 8.x（基于 8.7.0 stable plugin API 构建）
 - **Java**: 17 或更高版本
 - **内存**: 建议至少64MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
+
+Elasticsearch 9.x 需要单独的插件构建产物，当前 ES 8 包不覆盖 ES 9。
 
 ## 构建和安装插件
 
@@ -23,13 +25,13 @@
 
 1. **克隆项目**：
    ```bash
-   git clone https://github.com/your-repo/elastic-uyghur-analyzer.git
+   git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
    cd elastic-uyghur-analyzer
    ```
 
 2. **构建插件**：
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
    
    构建完成后，插件文件位于 `build/distributions/` 目录。
@@ -303,7 +305,7 @@ curl -k -X PUT "https://localhost:9200/custom_uyghur_index" \
 ```bash
 # 编译并运行交互式测试器
 ./gradlew compileJava
-java -cp build/classes/java/main:build/resources/main org.uyghur.morphology.InteractiveMorphologyTester
+java -cp build/classes/java/test:build/classes/java/main:build/resources/main org.tocharian.uyghur.morphology.InteractiveMorphologyTester
 ```
 
 ## 故障排除
@@ -341,7 +343,7 @@ java -cp build/classes/java/main:build/resources/main org.uyghur.morphology.Inte
 ```yaml
 # 在 elasticsearch.yml 中添加
 logger.org.tocharian: DEBUG
-logger.org.uyghur: DEBUG
+logger.org.tocharian.uyghur: DEBUG
 ```
 
 查看分析过程：
@@ -473,7 +475,7 @@ curl -k -X PUT "https://localhost:9200/uyghur_academic" \
 
 ## 技术支持
 
-- **GitHub Issues**: [提交问题](https://github.com/your-repo/elastic-uyghur-analyzer/issues)
+- **GitHub Issues**: [提交问题](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues)
 - **文档**: 查看项目文档获取更多技术细节
 - **社区**: 参与开源社区讨论和贡献
 

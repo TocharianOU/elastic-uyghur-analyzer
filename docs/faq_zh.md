@@ -53,7 +53,7 @@ THU词典包含多种格式：
    تېخنىكا. لار
    تېخنىكا. نىڭ
    ```
-3. 重新构建：`./gradlew clean build`
+3. 重新构建：`./gradlew clean check`
 
 ### 自定义词典的优先级如何？
 自定义词典具有**最高优先级**（95%置信度），会优先于THU词典进行匹配。这确保了用户定义的现代术语能够被正确识别。
@@ -125,7 +125,7 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ## 安装和部署
 
 ### 系统要求是什么？
-- **Elasticsearch**: 8.7+
+- **Elasticsearch**: 8.x（基于 8.7.0 stable plugin API 构建）
 - **Java**: 17 或更高版本
 - **内存**: 建议至少512MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
@@ -133,7 +133,7 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ### 如何安装插件？
 1. **构建插件**：
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 2. **安装到ES**：
@@ -213,7 +213,7 @@ docker restart es
 在 `elasticsearch.yml` 中添加：
 ```yaml
 logger.org.tocharian: DEBUG
-logger.org.uyghur: DEBUG
+logger.org.tocharian.uyghur: DEBUG
 ```
 
 ### 如何报告问题？

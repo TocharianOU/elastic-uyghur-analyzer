@@ -38,3 +38,6 @@ bin/
 *.iml
 *.ipr
 out/
+
+
+FIX_PLAN.local.md

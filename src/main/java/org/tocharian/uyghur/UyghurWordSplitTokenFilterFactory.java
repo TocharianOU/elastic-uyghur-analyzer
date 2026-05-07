@@ -17,13 +17,13 @@
  * under the License.
  */
 
-package org.tocharian;
+package org.tocharian.uyghur;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.elasticsearch.plugin.analysis.TokenFilterFactory;
 import org.elasticsearch.plugin.NamedComponent;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
 import java.io.IOException; 
 
 @NamedComponent(value = "uyghur_word_split")

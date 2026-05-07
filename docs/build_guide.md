@@ -25,10 +25,10 @@ cd elastic-uyghur-analyzer
 The plugin is configured to build against Elasticsearch 8.7.0+ by default.
 
 ```bash
-./gradlew clean build
+./gradlew clean check
 ```
 
-The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip`.
+The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`.
 
 ## Testing with Elasticsearch
 
@@ -49,8 +49,8 @@ sleep 30
 
 ```bash
 # Copy the plugin to the container and install it
-docker cp build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.0.0-es8.zip
 
 # Restart Elasticsearch to apply the plugin
 docker restart es
@@ -188,4 +188,3 @@ docker rm es kibana
 ## Support
 
 If you encounter any issues or have questions, please [open an issue](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues) on GitHub.
-```

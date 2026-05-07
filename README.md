@@ -1,6 +1,6 @@
 # Elasticsearch Uyghur Analyzer Plugin
 
-[![English](https://img.shields.io/badge/Language-English-blue)](README.md) [![中文](https://img.shields.io/badge/语言-中文-red)](README_zh.md) [![Downloads](https://img.shields.io/github/downloads/TocharianOU/elastic-uyghur-analyzer/total)](https://github.com/TocharianOU/elastic-uyghur-analyzer/releases) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TocharianOU/elastic-uyghur-analyzer)
+[![Build](https://github.com/TocharianOU/elastic-uyghur-analyzer/actions/workflows/build.yml/badge.svg)](https://github.com/TocharianOU/elastic-uyghur-analyzer/actions/workflows/build.yml) [![English](https://img.shields.io/badge/Language-English-blue)](README.md) [![中文](https://img.shields.io/badge/语言-中文-red)](README_zh.md) [![Downloads](https://img.shields.io/github/downloads/TocharianOU/elastic-uyghur-analyzer/total)](https://github.com/TocharianOU/elastic-uyghur-analyzer/releases) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TocharianOU/elastic-uyghur-analyzer)
 
 An Elasticsearch plugin that provides Uyghur language text analysis and tokenization capabilities.
 
@@ -19,14 +19,16 @@ This plugin adds Uyghur language support to Elasticsearch through custom analyze
 
 ## Requirements
 
-- Elasticsearch 8.7.0 or higher
+- Elasticsearch 8.x (built against the 8.7.0 stable plugin API)
 - Java 17 or higher
+
+Elasticsearch 9.x requires a separate plugin artifact and is not covered by the ES 8 package.
 
 ## Version Compatibility
 
 | Plugin Version | Elasticsearch Version | Release Date | Key Features |
 |---------------|----------------------|--------------|--------------|
-| v2.0-es8.7+   | 8.7.0+              | 2024-06     | Unified dictionary system, morphological analyzer |
+| 2.0.0-es8 | Elasticsearch 8.x, built against 8.7.0 stable plugin API; smoke-tested on 8.19.15 | 2026-05 | Unified dictionary system, morphology-based original/split analyzers |
 
 ## Installation
 
@@ -34,16 +36,16 @@ This plugin adds Uyghur language support to Elasticsearch through custom analyze
 
 1. Download the latest plugin:
    ```bash
-   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
 
 2. Install to Elasticsearch:
    ```bash
    # Install plugin from local file
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.0.0-es8.zip
    
    # Or install directly from URL
-   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
 
 3. Restart Elasticsearch and verify installation:
@@ -61,13 +63,27 @@ This plugin adds Uyghur language support to Elasticsearch through custom analyze
    ```bash
    git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
    cd elastic-uyghur-analyzer
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 2. Install the built plugin:
    ```bash
-   elasticsearch-plugin install file:///path/to/build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install file:///path/to/build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
+
+## Analyzer Behavior
+
+The plugin provides two analyzers for different search strategies:
+
+- `uyghur_original_analyzer`: restores historical/root forms where the THUUyMorph entry records vowel weakening.
+- `uyghur_split_analyzer`: preserves modern written forms while splitting suffixes.
+
+Examples:
+
+| Input | `uyghur_original_analyzer` | `uyghur_split_analyzer` |
+|-------|----------------------------|-------------------------|
+| `ئائىلىدىكى` | `ئائىلە + دىكى` | `ئائىلى + دىكى` |
+| `يېزىش` | `ياز + ىش` | `يېز + ىش` |
 
 ## Usage
 
@@ -116,6 +132,21 @@ The plugin uses several dictionary files:
 - `custom_dictionary.txt`: User-defined vocabulary (highest priority)
 - `thuuy_morph_raw.txt`: THU morphological dataset
 
+## Verification
+
+After installing the plugin and restarting Elasticsearch, verify both analyzers with `_analyze`:
+
+```bash
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'{
+  "analyzer": "uyghur_original_analyzer",
+  "text": "ئائىلىدىكى"
+}'
+```
+
+Then repeat the request with `uyghur_split_analyzer`. The two analyzers should return different root forms for words such as `ئائىلىدىكى` and `يېزىش`.
+
 ## Building from Source
 
 For development or customization:
@@ -123,10 +154,10 @@ For development or customization:
 ```bash
 git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
 cd elastic-uyghur-analyzer
-./gradlew clean build
+./gradlew clean check
 ```
 
-The built plugin will be available at `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip`
+The built plugin will be available at `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`
 
 ## Documentation
 
@@ -140,6 +171,8 @@ The built plugin will be available at `build/distributions/uyghur-analyzer-plugi
 This plugin uses the THUUyMorph dataset developed by Tsinghua University NLP Lab.
 - Website: http://thuuymorph.thunlp.org/
 - Citation: THUUyMorph - A Uyghur Morphological Analysis Corpus (CCL/NLP-NABD 2017)
+
+The bundled `thuuy_morph_raw.txt` dictionary is third-party data derived from THUUyMorph resources. Please preserve the attribution notice and cite the THUUyMorph paper if you use the bundled dictionary data in research or derivative work.
 
 ## License
 

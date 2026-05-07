@@ -12,10 +12,12 @@ This guide provides quick installation and usage instructions for the Elasticsea
 
 ## Compatibility
 
-- **Elasticsearch**: 8.7+
+- **Elasticsearch**: 8.x (built against the 8.7.0 stable plugin API)
 - **Java**: 17 or higher
 - **Memory**: Recommend at least 64MB for dictionary loading
 - **Storage**: About 50MB for plugin and dictionary files
+
+Elasticsearch 9.x requires a separate plugin artifact and is not covered by the ES 8 package.
 
 ## Building and Installing the Plugin
 
@@ -23,13 +25,13 @@ This guide provides quick installation and usage instructions for the Elasticsea
 
 1. **Clone the project**:
    ```bash
-   git clone https://github.com/your-repo/elastic-uyghur-analyzer.git
+   git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
    cd elastic-uyghur-analyzer
    ```
 
 2. **Build the plugin**:
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
    
    After building, the plugin file is located in the `build/distributions/` directory.
@@ -303,7 +305,7 @@ Use the built-in tester to verify morphological analysis effects:
 ```bash
 # Compile and run interactive tester
 ./gradlew compileJava
-java -cp build/classes/java/main:build/resources/main org.uyghur.morphology.InteractiveMorphologyTester
+java -cp build/classes/java/test:build/classes/java/main:build/resources/main org.tocharian.uyghur.morphology.InteractiveMorphologyTester
 ```
 
 ## Troubleshooting
@@ -341,7 +343,7 @@ Enable verbose logging:
 ```yaml
 # Add to elasticsearch.yml
 logger.org.tocharian: DEBUG
-logger.org.uyghur: DEBUG
+logger.org.tocharian.uyghur: DEBUG
 ```
 
 View analysis process:
@@ -473,7 +475,7 @@ curl -k -X PUT "https://localhost:9200/uyghur_academic" \
 
 ## Technical Support
 
-- **GitHub Issues**: [Submit Issues](https://github.com/your-repo/elastic-uyghur-analyzer/issues)
+- **GitHub Issues**: [Submit Issues](https://github.com/TocharianOU/elastic-uyghur-analyzer/issues)
 - **Documentation**: Check project documentation for more technical details
 - **Community**: Participate in open source community discussions and contributions
 

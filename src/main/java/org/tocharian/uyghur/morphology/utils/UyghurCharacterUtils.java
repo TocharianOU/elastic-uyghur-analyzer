@@ -13,7 +13,7 @@
  * under the License.
  */
 
-package org.uyghur.morphology.utils;
+package org.tocharian.uyghur.morphology.utils;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -134,9 +134,31 @@ public class UyghurCharacterUtils {
         if (text == null) {
             return "";
         }
-        
-        // 移除多余的空格和特殊字符
-        return text.trim().replaceAll("\\s+", " ");
+
+        StringBuilder normalized = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+
+            if (c == '\u0640' || c == '\u200C' || c == '\u200D') {
+                continue;
+            }
+
+            normalized.append(normalizeDigit(c));
+        }
+
+        return normalized.toString().trim().replaceAll("\\s+", " ");
+    }
+
+    private static char normalizeDigit(char c) {
+        if (c >= '\u0660' && c <= '\u0669') {
+            return (char) ('0' + c - '\u0660');
+        }
+
+        if (c >= '\u06F0' && c <= '\u06F9') {
+            return (char) ('0' + c - '\u06F0');
+        }
+
+        return c;
     }
     
     /**

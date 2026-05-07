@@ -184,7 +184,7 @@ src/main/resources/dictionaries/
 
 3. **重新构建**：
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 ### 词典统计信息

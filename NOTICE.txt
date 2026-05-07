@@ -1,5 +1,7 @@
 This product includes software developed at Tocharian (https://tocharian.eu/).
 
+Copyright 2024 Tocharian and contributors.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at:
@@ -14,11 +16,13 @@ limitations under the License.
 
 ---
 
-This project uses the THUUyMorph dataset, which is a morphology-based Uyghur language segmentation corpus provided by Tsinghua University Natural Language Processing and Computational Social Science Lab.
+This project uses a THUUyMorph-derived dictionary, based on the morphology-based Uyghur language segmentation corpus provided by Tsinghua University Natural Language Processing and Computational Social Science Lab.
 
 More information and the dataset can be found at: http://thuuymorph.thunlp.org/
 
 If you use this dataset in your work, please cite the following paper:
 THUUyMorph-A Uyghur Morphological Analysis Corpus. In Proceedings of CCL/NLP-NABD 2017, Nanjing, October.
 
-The dictionaries `ug_mor_original.txt` and `ug_mor_split.txt` used in this project are also based on the resources provided by Tsinghua University and the mentioned paper.
+The dictionary file `thuuy_morph_raw.txt` bundled with this project is third-party data derived from THUUyMorph resources. The plugin derives original and split dictionary views from that source file.
+
+The plugin code is licensed under the Apache License, Version 2.0. The THUUyMorph-derived dictionary data is documented separately here to preserve attribution and citation requirements for the original dataset.

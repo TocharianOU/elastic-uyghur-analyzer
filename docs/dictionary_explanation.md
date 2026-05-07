@@ -184,7 +184,7 @@ The system performs **vocabulary recognition and morphological restoration** rat
 
 3. **Rebuild**:
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 ### Dictionary Statistics

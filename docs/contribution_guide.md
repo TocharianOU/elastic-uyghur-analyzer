@@ -21,7 +21,7 @@ Thank you for your interest in contributing to the Elasticsearch Uyghur Analyzer
 
 2. **Build the Project**:
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 3. **Run Tests**:
@@ -107,7 +107,7 @@ Before submitting:
 ./gradlew test
 
 # Build the plugin
-./gradlew clean build
+./gradlew clean check
 
 # Test with Elasticsearch (optional)
 # Follow the build guide to test in Docker

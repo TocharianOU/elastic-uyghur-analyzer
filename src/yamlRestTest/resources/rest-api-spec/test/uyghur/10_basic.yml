@@ -1,0 +1,31 @@
+---
+"uyghur original analyzer restores root form":
+  - do:
+      indices.analyze:
+        body:
+          analyzer: uyghur_original_analyzer
+          text: "ئائىلىدىكى"
+
+  - length: { tokens: 2 }
+  - match: { tokens.0.token: "ئائىلە" }
+  - match: { tokens.0.start_offset: 0 }
+  - match: { tokens.0.end_offset: 6 }
+  - match: { tokens.1.token: "دىكى" }
+  - match: { tokens.1.start_offset: 6 }
+  - match: { tokens.1.end_offset: 10 }
+
+---
+"uyghur split analyzer preserves modern form":
+  - do:
+      indices.analyze:
+        body:
+          analyzer: uyghur_split_analyzer
+          text: "ئائىلىدىكى"
+
+  - length: { tokens: 2 }
+  - match: { tokens.0.token: "ئائىلى" }
+  - match: { tokens.0.start_offset: 0 }
+  - match: { tokens.0.end_offset: 6 }
+  - match: { tokens.1.token: "دىكى" }
+  - match: { tokens.1.start_offset: 6 }
+  - match: { tokens.1.end_offset: 10 }

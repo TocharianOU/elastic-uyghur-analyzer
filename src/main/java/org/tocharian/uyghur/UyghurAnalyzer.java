@@ -17,23 +17,25 @@
  * under the License.
  */
 
-package org.tocharian;
+package org.tocharian.uyghur;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
-import org.elasticsearch.plugin.analysis.TokenFilterFactory;
-import org.elasticsearch.plugin.NamedComponent;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+
 import java.io.IOException;
 
-@NamedComponent(value = "uyghur_word_original")
-public class UyghurWordOriginalTokenFilterFactory implements TokenFilterFactory {
+public class UyghurAnalyzer extends Analyzer {
     private final RuleBasedMorphologyAnalyzer morphologyAnalyzer;
+    private final DictionaryView viewType;
 
-    public UyghurWordOriginalTokenFilterFactory() {
+    public UyghurAnalyzer(DictionaryView viewType) {
+        this.morphologyAnalyzer = new RuleBasedMorphologyAnalyzer();
+        this.viewType = viewType;
+        
         try {
-            // 创建并初始化形态学分析器
-            this.morphologyAnalyzer = new RuleBasedMorphologyAnalyzer();
             this.morphologyAnalyzer.initialize();
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize morphology analyzer: " + e.getMessage(), e);
@@ -41,7 +43,9 @@ public class UyghurWordOriginalTokenFilterFactory implements TokenFilterFactory 
     }
 
     @Override
-    public TokenStream create(TokenStream tokenStream) {
-        return new UyghurWordTokenFilter(tokenStream, morphologyAnalyzer, DictionaryView.ORIGINAL);
+    protected TokenStreamComponents createComponents(String fieldName) {
+        StandardTokenizer tokenizer = new StandardTokenizer();
+        TokenStream tokenStream = new UyghurWordTokenFilter(tokenizer, morphologyAnalyzer, viewType);
+        return new TokenStreamComponents(tokenizer, tokenStream);
     }
 }

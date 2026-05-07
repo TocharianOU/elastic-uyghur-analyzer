@@ -13,7 +13,7 @@
  * under the License.
  */
 
-package org.uyghur.morphology.analyzer;
+package org.tocharian.uyghur.morphology.analyzer;
 
 import java.util.List;
 

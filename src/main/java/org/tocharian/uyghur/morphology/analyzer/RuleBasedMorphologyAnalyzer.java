@@ -13,11 +13,11 @@
  * under the License.
  */
 
-package org.uyghur.morphology.analyzer;
+package org.tocharian.uyghur.morphology.analyzer;
 
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-import org.uyghur.morphology.utils.UyghurCharacterUtils;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.utils.UyghurCharacterUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -40,22 +40,17 @@ public class RuleBasedMorphologyAnalyzer {
     private static final double FALLBACK_CONFIDENCE = 0.30;
     
     public RuleBasedMorphologyAnalyzer() {
-        this.unifiedDictionaryManager = new UnifiedDictionaryManager();
+        this.unifiedDictionaryManager = UnifiedDictionaryManager.shared();
     }
     
     /**
      * 初始化分析器
      */
     public void initialize() throws IOException {
-        if (!initialized) {
-            System.out.println("正在初始化维吾尔语形态分析器...");
-            
+        if (!initialized || !unifiedDictionaryManager.isInitialized()) {
             // 初始化统一词典管理器
             unifiedDictionaryManager.initialize();
-            System.out.println("统一词典加载完成: " + unifiedDictionaryManager.getStatistics());
-            
             initialized = true;
-            System.out.println("维吾尔语形态分析器初始化完成");
         }
     }
     
@@ -63,6 +58,13 @@ public class RuleBasedMorphologyAnalyzer {
      * 分析单词的形态结构
      */
     public MorphologyAnalysisResult analyze(String word) {
+        return analyze(word, DictionaryView.SPLIT);
+    }
+
+    /**
+     * 按指定词典视图分析单词的形态结构
+     */
+    public MorphologyAnalysisResult analyze(String word, DictionaryView viewType) {
         if (!initialized) {
             throw new IllegalStateException("分析器未初始化，请先调用initialize()方法");
         }
@@ -75,13 +77,13 @@ public class RuleBasedMorphologyAnalyzer {
         word = UyghurCharacterUtils.normalizeText(word);
         
         // 策略1: 词典精确匹配（优先使用自定义词典）
-        MorphologyAnalysisResult exactMatch = tryDictionaryExactMatch(word);
+        MorphologyAnalysisResult exactMatch = tryDictionaryExactMatch(word, viewType);
         if (exactMatch != null) {
             return exactMatch;
         }
         
         // 策略2: 词典部分匹配
-        MorphologyAnalysisResult partialMatch = tryDictionaryPartialMatch(word);
+        MorphologyAnalysisResult partialMatch = tryDictionaryPartialMatch(word, viewType);
         if (partialMatch != null) {
             return partialMatch;
         }
@@ -106,7 +108,7 @@ public class RuleBasedMorphologyAnalyzer {
     /**
      * 策略1: 词典精确匹配（使用统一词典管理器，优先使用自定义词典）
      */
-    private MorphologyAnalysisResult tryDictionaryExactMatch(String word) {
+    private MorphologyAnalysisResult tryDictionaryExactMatch(String word, DictionaryView viewType) {
         // 优先查找自定义词典
         String[] customResult = unifiedDictionaryManager.lookup(word, DictionaryView.CUSTOM);
         if (customResult != null) {
@@ -115,20 +117,12 @@ public class RuleBasedMorphologyAnalyzer {
                 "统一词典-自定义视图精确匹配");
         }
         
-        // 然后查找原始词典视图
-        String[] originalResult = unifiedDictionaryManager.lookup(word, DictionaryView.ORIGINAL);
-        if (originalResult != null) {
-            return new MorphologyAnalysisResult(word, Arrays.asList(originalResult), 
+        // 根据分析器配置查找对应词典视图，避免 original/split 分析器行为混同
+        String[] viewResult = unifiedDictionaryManager.lookup(word, viewType);
+        if (viewResult != null) {
+            return new MorphologyAnalysisResult(word, Arrays.asList(viewResult), 
                 DICTIONARY_EXACT_CONFIDENCE, MorphologyAnalysisResult.AnalysisMethod.DICTIONARY_EXACT, 
-                "统一词典-原始视图精确匹配");
-        }
-        
-        // 最后查找分割词典视图
-        String[] splitResult = unifiedDictionaryManager.lookup(word, DictionaryView.SPLIT);
-        if (splitResult != null) {
-            return new MorphologyAnalysisResult(word, Arrays.asList(splitResult), 
-                DICTIONARY_EXACT_CONFIDENCE, MorphologyAnalysisResult.AnalysisMethod.DICTIONARY_EXACT, 
-                "统一词典-分割视图精确匹配");
+                "统一词典-" + viewType + "视图精确匹配");
         }
         
         return null;
@@ -137,14 +131,8 @@ public class RuleBasedMorphologyAnalyzer {
     /**
      * 策略2: 词典部分匹配（使用统一词典管理器）
      */
-    private MorphologyAnalysisResult tryDictionaryPartialMatch(String word) {
-        // 首先尝试分割视图的最长匹配
-        List<String> longestMatches = unifiedDictionaryManager.findLongestMatches(word, DictionaryView.SPLIT);
-        
-        // 如果分割视图没有好的匹配，尝试原始视图
-        if (longestMatches.isEmpty()) {
-            longestMatches = unifiedDictionaryManager.findLongestMatches(word, DictionaryView.ORIGINAL);
-        }
+    private MorphologyAnalysisResult tryDictionaryPartialMatch(String word, DictionaryView viewType) {
+        List<String> longestMatches = unifiedDictionaryManager.findLongestMatches(word, viewType);
         
         if (!longestMatches.isEmpty()) {
             String longestMatch = longestMatches.get(0);

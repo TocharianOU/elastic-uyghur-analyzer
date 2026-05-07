@@ -13,16 +13,17 @@
  * under the License.
  */
 
-package org.uyghur.morphology.dictionary;
+package org.tocharian.uyghur.morphology.dictionary;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -40,6 +41,7 @@ public class UnifiedDictionaryManager {
     
     private static final String THU_DICTIONARY_PATH = "/dictionaries/thuuy_morph_raw.txt";
     private static final String CUSTOM_DICTIONARY_PATH = "/dictionaries/custom_dictionary.txt";
+    private static final UnifiedDictionaryManager SHARED_INSTANCE = new UnifiedDictionaryManager();
     
     // THU格式解析正则表达式
     private static final Pattern THU_PATTERN = Pattern.compile("^([^.()]+)\\.(\\([^)]+\\))\\s+(.+)$");  // 完整格式：词根.(原始) 后缀
@@ -62,17 +64,19 @@ public class UnifiedDictionaryManager {
         this.customView = new HashMap<>();
         this.rawThuData = new HashMap<>();
     }
+
+    public static UnifiedDictionaryManager shared() {
+        return SHARED_INSTANCE;
+    }
     
     /**
      * 初始化统一词典系统
      */
-    public void initialize() throws IOException {
+    public synchronized void initialize() throws IOException {
         if (initialized) {
             return;
         }
-        
-        System.out.println("初始化统一词典系统...");
-        
+
         // 1. 加载自定义词典（最高优先级）
         loadCustomDictionary();
         
@@ -80,27 +84,18 @@ public class UnifiedDictionaryManager {
         loadAndParseThuDictionary();
         
         initialized = true;
-        
-        System.out.println("统一词典系统初始化完成:");
-        System.out.println("  原始视图: " + originalView.size() + " 条");
-        System.out.println("  分割视图: " + splitView.size() + " 条");
-        System.out.println("  自定义视图: " + customView.size() + " 条");
-        System.out.println("  原始THU数据: " + rawThuData.size() + " 条");
     }
     
     /**
      * 加载自定义词典
      */
     private void loadCustomDictionary() throws IOException {
-        System.out.println("加载自定义词典...");
-        
         InputStream inputStream = getResourceAsStream(CUSTOM_DICTIONARY_PATH);
         if (inputStream == null) {
-            System.out.println("未找到自定义词典文件，跳过");
             return;
         }
         
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -112,8 +107,6 @@ public class UnifiedDictionaryManager {
                 parseCustomEntry(line);
             }
         }
-        
-        System.out.println("自定义词典加载完成: " + customView.size() + " 条");
     }
     
     /**
@@ -177,14 +170,12 @@ public class UnifiedDictionaryManager {
      * 加载并解析THU词典数据
      */
     private void loadAndParseThuDictionary() throws IOException {
-        System.out.println("加载THU词典数据...");
-        
         InputStream inputStream = getResourceAsStream(THU_DICTIONARY_PATH);
         if (inputStream == null) {
-            throw new IOException("无法找到THU词典文件: " + THU_DICTIONARY_PATH);
+            throw new IOException("Unable to find THUUyMorph dictionary resource: " + THU_DICTIONARY_PATH);
         }
         
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -199,8 +190,6 @@ public class UnifiedDictionaryManager {
                 parseThuEntry(line);
             }
         }
-        
-        System.out.println("THU词典解析完成，生成 " + originalView.size() + " 个原始视图条目，" + splitView.size() + " 个分割视图条目");
     }
     
     /**
@@ -330,41 +319,20 @@ public class UnifiedDictionaryManager {
         return String.join("", parts);
     }
     
-    /**
-     * 从多个路径尝试获取资源流
-     */
     private InputStream getResourceAsStream(String path) {
-        InputStream inputStream = getClass().getResourceAsStream(path);
-        
-        if (inputStream == null) {
-            // 尝试不带前导斜杠的路径
-            inputStream = getClass().getResourceAsStream(path.substring(1));
-        }
-        
-        if (inputStream == null) {
-            // 尝试相对于类路径的路径
-            inputStream = getClass().getClassLoader().getResourceAsStream(path.substring(1));
-        }
-        
-        return inputStream;
+        return getClass().getResourceAsStream(path);
     }
     
     // === 查询接口 ===
     
     /**
-     * 优先级查询：自定义 > 原始 > 分割
+     * 查询指定词典视图。自定义词典优先级由调用方显式控制，避免重复查询。
      */
     public String[] lookup(String word, DictionaryView viewType) {
         if (!initialized) {
             throw new IllegalStateException("词典系统未初始化");
         }
-        
-        // 1. 首先检查自定义词典
-        if (customView.containsKey(word)) {
-            return customView.get(word);
-        }
-        
-        // 2. 根据视图类型查询
+
         switch (viewType) {
             case ORIGINAL:
                 return originalView.get(word);
@@ -391,17 +359,16 @@ public class UnifiedDictionaryManager {
      */
     public List<String> findLongestMatches(String word, DictionaryView viewType) {
         Map<String, String[]> targetView = getViewMap(viewType);
-        List<String> matches = new ArrayList<>();
         
         // 从最长到最短查找前缀匹配
         for (int i = word.length(); i > 0; i--) {
             String prefix = word.substring(0, i);
             if (targetView.containsKey(prefix)) {
-                matches.add(prefix);
+                return Collections.singletonList(prefix);
             }
         }
         
-        return matches;
+        return Collections.emptyList();
     }
     
     /**
@@ -423,19 +390,19 @@ public class UnifiedDictionaryManager {
     // === Getter方法 ===
     
     public Map<String, String[]> getOriginalView() {
-        return new HashMap<>(originalView);
+        return Collections.unmodifiableMap(originalView);
     }
     
     public Map<String, String[]> getSplitView() {
-        return new HashMap<>(splitView);
+        return Collections.unmodifiableMap(splitView);
     }
     
     public Map<String, String[]> getCustomView() {
-        return new HashMap<>(customView);
+        return Collections.unmodifiableMap(customView);
     }
     
     public Map<String, String> getRawThuData() {
-        return new HashMap<>(rawThuData);
+        return Collections.unmodifiableMap(rawThuData);
     }
     
     public boolean isInitialized() {

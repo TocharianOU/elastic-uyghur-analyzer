@@ -53,7 +53,7 @@ The THU dictionary contains multiple formats:
    تېخنىكا. لار
    تېخنىكا. نىڭ
    ```
-3. Rebuild: `./gradlew clean build`
+3. Rebuild: `./gradlew clean check`
 
 ### What is the priority of the custom dictionary?
 The custom dictionary has the **highest priority** (95% confidence), taking precedence over the THU dictionary for matching. This ensures user-defined modern terms are correctly recognized.
@@ -125,7 +125,7 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ## Installation and Deployment
 
 ### What are the system requirements?
-- **Elasticsearch**: 8.7+
+- **Elasticsearch**: 8.x (built against the 8.7.0 stable plugin API)
 - **Java**: 17 or higher
 - **Memory**: Recommend at least 512MB for dictionary loading
 - **Storage**: About 50MB for plugin and dictionary files
@@ -133,7 +133,7 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ### How to install the plugin?
 1. **Build plugin**:
    ```bash
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 2. **Install to ES**:
@@ -213,7 +213,7 @@ Solution: Confirm plugin is correctly installed and restart ES
 Add to `elasticsearch.yml`:
 ```yaml
 logger.org.tocharian: DEBUG
-logger.org.uyghur: DEBUG
+logger.org.tocharian.uyghur: DEBUG
 ```
 
 ### How to report issues?

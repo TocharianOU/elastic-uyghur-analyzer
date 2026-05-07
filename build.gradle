@@ -32,12 +32,12 @@ esplugin {
 }
 
 group 'org.tocharian'
-version 'v2.0-es8.7+'
+version '2.0.0-es8'
 
 // 自定义归档文件名
 tasks.withType(Zip) {
     archiveBaseName = 'uyghur-analyzer-plugin'
-    archiveVersion = 'v2.0-es8.7+'
+    archiveVersion = '2.0.0-es8'
 }
 
 repositories {
@@ -59,6 +59,9 @@ dependencies {
     testImplementation "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
     testImplementation "org.apache.lucene:lucene-core:${luceneVersion}"
     testImplementation "org.apache.lucene:lucene-analysis-common:${luceneVersion}"
+    testImplementation "org.apache.lucene:lucene-test-framework:${luceneVersion}"
+
+    yamlRestTestImplementation "org.elasticsearch.test:yaml-rest-runner:${elasticsearchVersion}"
 
     testImplementation ('junit:junit:4.13.2') {
         exclude group: 'org.hamcrest'
@@ -67,33 +70,3 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest:2.2'
 }
 
-task setupEnvironment {
-    doLast {
-        def osName = System.getProperty('os.name').toLowerCase()
-        def isWindows = osName.contains('win')
-        def isMac = osName.contains('mac')
-        def isLinux = osName.contains('nux')
-        def arch = System.getProperty('os.arch')
-        def isArm = arch == 'aarch64'
-        
-        if (isWindows) {
-            println 'Configuring for Windows'
-        } else if (isMac) {
-            if (isArm) {
-                println 'Configuring for macOS ARM'
-            } else {
-                println 'Configuring for macOS Intel'
-            }
-        } else if (isLinux) {
-            if (isArm) {
-                println 'Configuring for Linux ARM'
-            } else {
-                println 'Configuring for Linux x86'
-            }
-        } else {
-            throw new GradleException("Unsupported operating system: ${osName}")
-        }
-    }
-}
-
-assemble.dependsOn setupEnvironment

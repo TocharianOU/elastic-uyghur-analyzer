@@ -1,7 +1,7 @@
-import org.tocharian.DictionaryLoader;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
-import org.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
-import org.uyghur.morphology.analyzer.MorphologyAnalysisResult;
+import org.tocharian.uyghur.DictionaryLoader;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.analyzer.RuleBasedMorphologyAnalyzer;
+import org.tocharian.uyghur.morphology.analyzer.MorphologyAnalysisResult;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -374,4 +374,4 @@ public class TokenizationEffectTester {
         System.out.println("- 自定义词典优先级支持");
         System.out.println();
     }
-} 
+}

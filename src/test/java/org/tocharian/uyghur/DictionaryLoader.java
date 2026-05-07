@@ -17,26 +17,24 @@
  * under the License.
  */
 
+package org.tocharian.uyghur;
 
-package org.tocharian;
-
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager;
-import org.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager;
+import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
 
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * 统一词典加载器
- * 使用UnifiedDictionaryManager作为单一数据源
+ * Test helper for manually inspecting dictionary views.
  */
 public class DictionaryLoader {
     private final UnifiedDictionaryManager unifiedManager;
     private DictionaryView currentView;
 
     public DictionaryLoader() {
-        this.unifiedManager = new UnifiedDictionaryManager();
-        this.currentView = DictionaryView.SPLIT; // 默认使用分割视图
+        this.unifiedManager = UnifiedDictionaryManager.shared();
+        this.currentView = DictionaryView.SPLIT;
     }
 
     public Map<String, String[]> getDictionary() {
@@ -47,18 +45,13 @@ public class DictionaryLoader {
                 throw new RuntimeException("Failed to initialize unified dictionary: " + e.getMessage(), e);
             }
         }
-        
-        // 返回合并后的词典，自定义词典优先
+
         return getMergedDictionary();
     }
-    
-    /**
-     * 获取合并后的词典，自定义词典优先
-     */
+
     private Map<String, String[]> getMergedDictionary() {
         Map<String, String[]> baseDict;
-        
-        // 根据当前视图获取基础词典
+
         switch (currentView) {
             case ORIGINAL:
                 baseDict = new java.util.HashMap<>(unifiedManager.getOriginalView());
@@ -71,60 +64,36 @@ public class DictionaryLoader {
             default:
                 baseDict = new java.util.HashMap<>(unifiedManager.getSplitView());
         }
-        
-        // 自定义词典覆盖基础词典
-        Map<String, String[]> customDict = unifiedManager.getCustomView();
-        baseDict.putAll(customDict);
-        
+
+        baseDict.putAll(unifiedManager.getCustomView());
         return baseDict;
     }
 
-    /**
-     * 为了向后兼容保留的方法
-     * 根据资源路径推断词典类型（仅在未显式设置视图时）
-     */
     public void initializeFromResource(String resourcePath) throws IOException {
-        // 仅在未显式设置视图类型时才根据路径推断
         if (this.currentView == DictionaryView.SPLIT && resourcePath.contains("original")) {
             this.currentView = DictionaryView.ORIGINAL;
         } else if (this.currentView == DictionaryView.SPLIT && resourcePath.contains("custom")) {
             this.currentView = DictionaryView.CUSTOM;
         }
-        // 如果已经显式设置了视图类型，则保持不变
-        
-        // 初始化统一词典管理器
+
         if (!unifiedManager.isInitialized()) {
             unifiedManager.initialize();
         }
     }
 
-    /**
-     * 设置词典视图类型
-     */
     public void setDictionaryView(DictionaryView view) {
         this.currentView = view;
     }
 
-    /**
-     * 获取当前词典视图类型
-     */
     public DictionaryView getCurrentView() {
         return currentView;
     }
 
-    /**
-     * 获取统一词典管理器实例
-     */
     public UnifiedDictionaryManager getUnifiedManager() {
         return unifiedManager;
     }
 
-    /**
-     * 为了向后兼容保留的URL加载方法（现在使用统一系统）
-     */
     public void initializeFromUrl(String urlPath) throws IOException {
-        // URL加载暂时不支持，使用本地统一词典
-        System.out.println("URL加载已弃用，使用统一词典系统");
         initializeFromResource("/dictionaries/thuuy_morph_raw.txt");
     }
 }

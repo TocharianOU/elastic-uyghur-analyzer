@@ -1,6 +1,6 @@
 # Elasticsearch 维吾尔语分析器插件
 
-[![English](https://img.shields.io/badge/Language-English-blue)](README.md) [![中文](https://img.shields.io/badge/语言-中文-red)](README_zh.md) [![Downloads](https://img.shields.io/github/downloads/TocharianOU/elastic-uyghur-analyzer/total)](https://github.com/TocharianOU/elastic-uyghur-analyzer/releases) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TocharianOU/elastic-uyghur-analyzer)
+[![Build](https://github.com/TocharianOU/elastic-uyghur-analyzer/actions/workflows/build.yml/badge.svg)](https://github.com/TocharianOU/elastic-uyghur-analyzer/actions/workflows/build.yml) [![English](https://img.shields.io/badge/Language-English-blue)](README.md) [![中文](https://img.shields.io/badge/语言-中文-red)](README_zh.md) [![Downloads](https://img.shields.io/github/downloads/TocharianOU/elastic-uyghur-analyzer/total)](https://github.com/TocharianOU/elastic-uyghur-analyzer/releases) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TocharianOU/elastic-uyghur-analyzer)
 
 一个为 Elasticsearch 提供维吾尔语文本分析和分词功能的插件。
 
@@ -19,14 +19,16 @@
 
 ## 系统要求
 
-- Elasticsearch 8.7.0 或更高版本
+- Elasticsearch 8.x（基于 8.7.0 stable plugin API 构建）
 - Java 17 或更高版本
+
+Elasticsearch 9.x 需要单独的插件构建产物，当前 ES 8 包不覆盖 ES 9。
 
 ## 版本兼容性
 
 | 插件版本 | Elasticsearch 版本 | 发布日期 | 主要功能 |
 |---------|-------------------|----------|----------|
-| v2.0-es8.7+ | 8.7.0+ | 2024-06 | 统一词典系统，形态学分析器 |
+| 2.0.0-es8 | Elasticsearch 8.x，基于 8.7.0 stable plugin API 构建；已在 8.19.15 smoke test 通过 | 2026-05 | 统一词典系统，基于形态学的 original/split 分析器 |
 
 ## 安装
 
@@ -34,16 +36,16 @@
 
 1. 下载最新插件：
    ```bash
-   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
 
 2. 安装到 Elasticsearch：
    ```bash
    # 从本地文件安装插件
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.0.0-es8.zip
    
    # 或直接从 URL 安装
-   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0-es8.7%2B/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
 
 3. 重启 Elasticsearch 并验证安装：
@@ -61,13 +63,27 @@
    ```bash
    git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
    cd elastic-uyghur-analyzer
-   ./gradlew clean build
+   ./gradlew clean check
    ```
 
 2. 安装构建的插件：
    ```bash
-   elasticsearch-plugin install file:///path/to/build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip
+   elasticsearch-plugin install file:///path/to/build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip
    ```
+
+## 分析器行为
+
+本插件提供两种适用于不同检索策略的分析器：
+
+- `uyghur_original_analyzer`：在 THUUyMorph 记录元音弱化时恢复历史/词根形式。
+- `uyghur_split_analyzer`：保留现代书写形式，同时拆分后缀。
+
+示例：
+
+| 输入 | `uyghur_original_analyzer` | `uyghur_split_analyzer` |
+|------|----------------------------|-------------------------|
+| `ئائىلىدىكى` | `ئائىلە + دىكى` | `ئائىلى + دىكى` |
+| `يېزىش` | `ياز + ىش` | `يېز + ىش` |
 
 ## 使用方法
 
@@ -116,6 +132,21 @@ curl -k -X POST "https://localhost:9200/uyghur_index/_analyze" \
 - `custom_dictionary.txt`：用户定义的词汇（最高优先级）
 - `thuuy_morph_raw.txt`：THU 形态学数据集
 
+## 验证
+
+安装插件并重启 Elasticsearch 后，可以使用 `_analyze` 分别验证两个分析器：
+
+```bash
+curl -k -X POST "https://localhost:9200/_analyze" \
+  -u elastic:your_password \
+  -H "Content-Type: application/json" -d'{
+  "analyzer": "uyghur_original_analyzer",
+  "text": "ئائىلىدىكى"
+}'
+```
+
+然后将 analyzer 改为 `uyghur_split_analyzer` 再执行一次。对于 `ئائىلىدىكى`、`يېزىش` 等词，两种分析器应返回不同的词根形式。
+
 ## 从源码构建
 
 用于开发或自定义：
@@ -123,10 +154,10 @@ curl -k -X POST "https://localhost:9200/uyghur_index/_analyze" \
 ```bash
 git clone https://github.com/TocharianOU/elastic-uyghur-analyzer.git
 cd elastic-uyghur-analyzer
-./gradlew clean build
+./gradlew clean check
 ```
 
-构建的插件将位于 `build/distributions/uyghur-analyzer-plugin-v2.0-es8.7+.zip`
+构建的插件将位于 `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`
 
 ## 文档
 
@@ -140,6 +171,8 @@ cd elastic-uyghur-analyzer
 本插件使用清华大学自然语言处理实验室开发的 THUUyMorph 数据集。
 - 网站：http://thuuymorph.thunlp.org/
 - 引用：THUUyMorph - A Uyghur Morphological Analysis Corpus (CCL/NLP-NABD 2017)
+
+随插件提供的 `thuuy_morph_raw.txt` 词典是基于 THUUyMorph 资源生成的第三方数据。使用、分发或在研究/衍生工作中使用该词典时，请保留数据来源说明并引用 THUUyMorph 论文。
 
 ## 许可证
 
