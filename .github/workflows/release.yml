@@ -43,10 +43,14 @@ jobs:
       - name: Build and test
         run: |
           if [ "${{ matrix.es-major }}" = "9" ]; then
-            ./gradlew wrapper --gradle-version 8.14 --distribution-type all
+            curl -fsSL https://services.gradle.org/distributions/gradle-8.14-bin.zip -o /tmp/gradle-8.14-bin.zip
+            unzip -q /tmp/gradle-8.14-bin.zip -d /tmp
+            GRADLE_CMD=/tmp/gradle-8.14/bin/gradle
+          else
+            GRADLE_CMD=./gradlew
           fi
 
-          ./gradlew clean check \
+          "$GRADLE_CMD" clean check \
             -PesMajor=${{ matrix.es-major }} \
             -PelasticsearchVersion=${{ matrix.elasticsearch-version }} \
             -PluceneVersion=${{ matrix.lucene-version }}
