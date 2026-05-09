@@ -19,16 +19,20 @@ This plugin adds Uyghur language support to Elasticsearch through custom analyze
 
 ## Requirements
 
-- Elasticsearch 8.x (built against the 8.7.0 stable plugin API)
+- Elasticsearch 8.x or 9.x
 - Java 17 or higher
 
-Elasticsearch 9.x requires a separate plugin artifact and is not covered by the ES 8 package.
+Use the matching plugin artifact for your Elasticsearch major version:
+
+- `uyghur-analyzer-plugin-2.0.0-es8.zip` for Elasticsearch 8.x
+- `uyghur-analyzer-plugin-2.0.0-es9.zip` for Elasticsearch 9.x
 
 ## Version Compatibility
 
 | Plugin Version | Elasticsearch Version | Release Date | Key Features |
 |---------------|----------------------|--------------|--------------|
-| 2.0.0-es8 | Elasticsearch 8.x, built against 8.7.0 stable plugin API; smoke-tested on 8.19.15 | 2026-05 | Unified dictionary system, morphology-based original/split analyzers |
+| 2.0.0-es8 | Elasticsearch 8.x, built against 8.7.0 stable plugin API; smoke-tested on 8.7.0 and 8.19.15 | 2026-05 | Unified dictionary system, morphology-based original/split analyzers |
+| 2.0.0-es9 | Elasticsearch 9.x, built against 9.4.0 stable plugin API; smoke-tested on 9.4.0 | 2026-05 | Unified dictionary system, morphology-based original/split analyzers |
 
 ## Installation
 
@@ -36,7 +40,11 @@ Elasticsearch 9.x requires a separate plugin artifact and is not covered by the 
 
 1. Download the latest plugin:
    ```bash
+   # Elasticsearch 8.x
    wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
+
+   # Elasticsearch 9.x
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es9.zip
    ```
 
 2. Install to Elasticsearch:
@@ -158,6 +166,14 @@ cd elastic-uyghur-analyzer
 ```
 
 The built plugin will be available at `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`
+
+To build the Elasticsearch 9.x artifact:
+
+```bash
+./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+```
+
+The Elasticsearch 9.x plugin will be available at `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip`.
 
 ## Documentation
 

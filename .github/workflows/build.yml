@@ -10,28 +10,50 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - es-major: "8"
+            elasticsearch-version: "8.7.0"
+            lucene-version: "9.5.0"
+            java-version: "17"
+            artifact: "uyghur-analyzer-plugin-2.0.0-es8.zip"
+          - es-major: "9"
+            elasticsearch-version: "9.4.0"
+            lucene-version: "10.4.0"
+            java-version: "24"
+            artifact: "uyghur-analyzer-plugin-2.0.0-es9.zip"
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK ${{ matrix.java-version }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: ${{ matrix.java-version }}
 
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
 
       - name: Build and test
-        run: ./gradlew clean check
+        run: |
+          if [ "${{ matrix.es-major }}" = "9" ]; then
+            ./gradlew wrapper --gradle-version 8.14 --distribution-type all
+          fi
+
+          ./gradlew clean check \
+            -PesMajor=${{ matrix.es-major }} \
+            -PelasticsearchVersion=${{ matrix.elasticsearch-version }} \
+            -PluceneVersion=${{ matrix.lucene-version }}
 
       - name: Upload plugin artifact
         uses: actions/upload-artifact@v4
         with:
-          name: uyghur-analyzer-plugin
-          path: build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip
+          name: uyghur-analyzer-plugin-es${{ matrix.es-major }}
+          path: build/distributions/${{ matrix.artifact }}
 
   smoke-test:
     needs: build
@@ -39,15 +61,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        elasticsearch-version:
-          - "8.7.0"
-          - "8.19.15"
+        include:
+          - es-major: "8"
+            elasticsearch-version: "8.7.0"
+            artifact: "uyghur-analyzer-plugin-2.0.0-es8.zip"
+          - es-major: "8"
+            elasticsearch-version: "8.19.15"
+            artifact: "uyghur-analyzer-plugin-2.0.0-es8.zip"
+          - es-major: "9"
+            elasticsearch-version: "9.4.0"
+            artifact: "uyghur-analyzer-plugin-2.0.0-es9.zip"
 
     steps:
       - name: Download plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: uyghur-analyzer-plugin
+          name: uyghur-analyzer-plugin-es${{ matrix.es-major }}
           path: dist
 
       - name: Start Elasticsearch with plugin
@@ -59,7 +88,7 @@ jobs:
             -e discovery.type=single-node \
             -e xpack.security.enabled=false \
             -e ES_JAVA_OPTS="-Xms512m -Xmx512m" \
-            -v "$PWD/dist/uyghur-analyzer-plugin-2.0.0-es8.zip:/tmp/uyghur-analyzer-plugin.zip:ro" \
+            -v "$PWD/dist/${{ matrix.artifact }}:/tmp/uyghur-analyzer-plugin.zip:ro" \
             docker.elastic.co/elasticsearch/elasticsearch:${{ matrix.elasticsearch-version }} \
             bash -lc 'bin/elasticsearch-plugin install --batch file:///tmp/uyghur-analyzer-plugin.zip && exec bin/elasticsearch'
 

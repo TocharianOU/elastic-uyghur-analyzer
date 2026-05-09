@@ -12,12 +12,12 @@ This guide provides quick installation and usage instructions for the Elasticsea
 
 ## Compatibility
 
-- **Elasticsearch**: 8.x (built against the 8.7.0 stable plugin API)
-- **Java**: 17 or higher
+- **Elasticsearch**: 8.x or 9.x
+- **Java**: 17 or higher for Elasticsearch 8.x builds; Java 21 or higher for Elasticsearch 9.x builds
 - **Memory**: Recommend at least 64MB for dictionary loading
 - **Storage**: About 50MB for plugin and dictionary files
 
-Elasticsearch 9.x requires a separate plugin artifact and is not covered by the ES 8 package.
+Use `uyghur-analyzer-plugin-2.0.0-es8.zip` for Elasticsearch 8.x and `uyghur-analyzer-plugin-2.0.0-es9.zip` for Elasticsearch 9.x.
 
 ## Building and Installing the Plugin
 

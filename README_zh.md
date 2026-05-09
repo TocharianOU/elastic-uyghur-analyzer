@@ -19,16 +19,20 @@
 
 ## 系统要求
 
-- Elasticsearch 8.x（基于 8.7.0 stable plugin API 构建）
+- Elasticsearch 8.x 或 9.x
 - Java 17 或更高版本
 
-Elasticsearch 9.x 需要单独的插件构建产物，当前 ES 8 包不覆盖 ES 9。
+请根据 Elasticsearch 主版本选择对应插件包：
+
+- `uyghur-analyzer-plugin-2.0.0-es8.zip` 用于 Elasticsearch 8.x
+- `uyghur-analyzer-plugin-2.0.0-es9.zip` 用于 Elasticsearch 9.x
 
 ## 版本兼容性
 
 | 插件版本 | Elasticsearch 版本 | 发布日期 | 主要功能 |
 |---------|-------------------|----------|----------|
-| 2.0.0-es8 | Elasticsearch 8.x，基于 8.7.0 stable plugin API 构建；已在 8.19.15 smoke test 通过 | 2026-05 | 统一词典系统，基于形态学的 original/split 分析器 |
+| 2.0.0-es8 | Elasticsearch 8.x，基于 8.7.0 stable plugin API 构建；已在 8.7.0 和 8.19.15 smoke test 通过 | 2026-05 | 统一词典系统，基于形态学的 original/split 分析器 |
+| 2.0.0-es9 | Elasticsearch 9.x，基于 9.4.0 stable plugin API 构建；已在 9.4.0 smoke test 通过 | 2026-05 | 统一词典系统，基于形态学的 original/split 分析器 |
 
 ## 安装
 
@@ -36,7 +40,11 @@ Elasticsearch 9.x 需要单独的插件构建产物，当前 ES 8 包不覆盖 E
 
 1. 下载最新插件：
    ```bash
+   # Elasticsearch 8.x
    wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es8.zip
+
+   # Elasticsearch 9.x
+   wget https://github.com/TocharianOU/elastic-uyghur-analyzer/releases/download/v2.0.0/uyghur-analyzer-plugin-2.0.0-es9.zip
    ```
 
 2. 安装到 Elasticsearch：
@@ -158,6 +166,14 @@ cd elastic-uyghur-analyzer
 ```
 
 构建的插件将位于 `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`
+
+构建 Elasticsearch 9.x 插件包：
+
+```bash
+./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+```
+
+Elasticsearch 9.x 插件将位于 `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip`。
 
 ## 文档
 

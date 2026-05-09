@@ -1,6 +1,6 @@
 # Elastic Uyghur Analyzer 插件构建指南
 
-本文档提供了构建、测试和打包 Elasticsearch 8.7.0+ 版本的 Elastic Uyghur Analyzer 插件的说明。
+本文档提供了构建、测试和打包 Elasticsearch 8.x 与 9.x 版本 Elastic Uyghur Analyzer 插件的说明。
 
 ## 前提条件
 
@@ -22,13 +22,21 @@ cd elastic-uyghur-analyzer
 
 ### 构建插件
 
-该插件默认配置为针对 Elasticsearch 8.7.0+ 进行构建。
+该插件默认构建 Elasticsearch 8.x 插件包。
 
 ```bash
 ./gradlew clean check
 ```
 
 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip` 创建。
+
+构建 Elasticsearch 9.x 插件包时，使用 Elasticsearch 9.4.0 和 Lucene 10.4.0：
+
+```bash
+./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+```
+
+Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip` 创建。
 
 ## 使用 Elasticsearch 进行测试
 

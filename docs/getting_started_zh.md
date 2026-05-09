@@ -12,12 +12,12 @@
 
 ## 兼容性
 
-- **Elasticsearch**: 8.x（基于 8.7.0 stable plugin API 构建）
-- **Java**: 17 或更高版本
+- **Elasticsearch**: 8.x 或 9.x
+- **Java**: Elasticsearch 8.x 构建需要 Java 17 或更高版本；Elasticsearch 9.x 构建需要 Java 21 或更高版本
 - **内存**: 建议至少64MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
 
-Elasticsearch 9.x 需要单独的插件构建产物，当前 ES 8 包不覆盖 ES 9。
+Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.0.0-es8.zip`，Elasticsearch 9.x 使用 `uyghur-analyzer-plugin-2.0.0-es9.zip`。
 
 ## 构建和安装插件
 

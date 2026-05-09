@@ -9,12 +9,17 @@ All notable changes to this project will be documented in this file.
 - Correct stale documentation references for dictionary files and repository URLs.
 - Normalize the ES 8 release tag and ZIP artifact name to `v2.0.0` / `uyghur-analyzer-plugin-2.0.0-es8.zip`.
 - Verify the ES 8 stable plugin artifact installs and analyzes successfully on Elasticsearch 8.19.15.
+- Add parameterized Elasticsearch 9.x packaging as `uyghur-analyzer-plugin-2.0.0-es9.zip`, built against the 9.4.0 stable plugin API.
 
 ## [2.0.0-es8] - 2026-05
 ### Added
 - Unified dictionary system based on `thuuy_morph_raw.txt`.
 - Rule-based Uyghur morphology analyzer with original and split dictionary views.
 - Elasticsearch 8.x compatible stable analysis plugin packaging, built against the 8.7.0 stable plugin API.
+
+## [2.0.0-es9] - 2026-05
+### Added
+- Elasticsearch 9.x compatible stable analysis plugin packaging, built against the 9.4.0 stable plugin API.
 
 ## [1.0.0] - 2024-07-31
 ### Added

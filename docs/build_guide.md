@@ -1,6 +1,6 @@
 # Build Guide for Elastic Uyghur Analyzer Plugin
 
-This document provides instructions for building, testing, and packaging the Elastic Uyghur Analyzer Plugin for Elasticsearch 8.7.0+.
+This document provides instructions for building, testing, and packaging the Elastic Uyghur Analyzer Plugin for Elasticsearch 8.x and 9.x.
 
 ## Prerequisites
 
@@ -22,13 +22,21 @@ cd elastic-uyghur-analyzer
 
 ### Building the Plugin
 
-The plugin is configured to build against Elasticsearch 8.7.0+ by default.
+The plugin is configured to build the Elasticsearch 8.x artifact by default.
 
 ```bash
 ./gradlew clean check
 ```
 
 The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`.
+
+To build the Elasticsearch 9.x artifact, use Elasticsearch 9.4.0 and Lucene 10.4.0:
+
+```bash
+./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+```
+
+The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip`.
 
 ## Testing with Elasticsearch
 

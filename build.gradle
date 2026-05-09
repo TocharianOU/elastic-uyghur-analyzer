@@ -13,15 +13,20 @@ apply plugin: 'java'
 apply plugin: 'elasticsearch.stable-esplugin'
 apply plugin: 'elasticsearch.yaml-rest-test'
 
+def esMajor = (findProperty('esMajor') ?: elasticsearchVersion.toString().tokenize('.')[0]).toString()
+def pluginReleaseVersion = (findProperty('pluginReleaseVersion') ?: '2.0.0').toString()
+def pluginArtifactVersion = "${pluginReleaseVersion}-es${esMajor}"
+def javaReleaseVersion = esMajor == '9' ? 21 : 17
+
 // Java版本配置
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.toVersion(javaReleaseVersion)
+    targetCompatibility = JavaVersion.toVersion(javaReleaseVersion)
 }
 
 compileJava {
     options.encoding = 'UTF-8'
-    options.release = 17
+    options.release = javaReleaseVersion
 }
 
 esplugin {
@@ -32,12 +37,13 @@ esplugin {
 }
 
 group 'org.tocharian'
-version '2.0.0-es8'
+
+version pluginArtifactVersion
 
 // 自定义归档文件名
 tasks.withType(Zip) {
     archiveBaseName = 'uyghur-analyzer-plugin'
-    archiveVersion = '2.0.0-es8'
+    archiveVersion = pluginArtifactVersion
 }
 
 repositories {

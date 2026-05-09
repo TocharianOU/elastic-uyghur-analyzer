@@ -58,7 +58,7 @@ The plugin uses several dictionary files located in `src/main/resources/dictiona
 
 ### 3. Testing and Quality Assurance
 
-- Test with different Elasticsearch versions (8.7.0+)
+- Test with supported Elasticsearch 8.x and 9.x versions
 - Add test cases for edge cases in Uyghur morphology
 - Performance testing with large text corpora
 - Integration testing with real-world scenarios
