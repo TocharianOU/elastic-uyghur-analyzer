@@ -59,6 +59,17 @@ public class RuleBasedMorphologyAnalyzerTest {
     }
 
     @Test
+    public void partialDictionaryMatchExpandsKnownPrefixBeforeSuffixChain() {
+        MorphologyAnalysisResult original = analyzer.analyze("ئىشلىگەننىڭ", DictionaryView.ORIGINAL);
+        MorphologyAnalysisResult split = analyzer.analyze("ئىشلىگەننىڭ", DictionaryView.SPLIT);
+
+        assertEquals(Arrays.asList("ئىشلە", "گەن", "نىڭ"), original.getMorphemes());
+        assertEquals(Arrays.asList("ئىشلى", "گەن", "نىڭ"), split.getMorphemes());
+        assertEquals(MorphologyAnalysisResult.AnalysisMethod.DICTIONARY_PARTIAL, original.getMethod());
+        assertEquals(MorphologyAnalysisResult.AnalysisMethod.DICTIONARY_PARTIAL, split.getMethod());
+    }
+
+    @Test
     public void unknownWordsReturnNonEmptyAnalysis() {
         for (String word : Arrays.asList("كىتابلىرىمنىڭ", "ئۆيلەردىكى", "دوستلىرىنى")) {
             MorphologyAnalysisResult result = analyzer.analyze(word, DictionaryView.SPLIT);

@@ -107,7 +107,7 @@ Through analysis of actual dictionary content, the following format patterns are
 # Example 1: Vowel weakening restoration
 يېزىش.(يازىش) قا
 # Modern form: يېزىش
-# Original form: يازىش  
+# Original form: يازىش
 # Suffix: قا
 
 # Example 2: Complex suffix combination
@@ -141,7 +141,7 @@ The system performs **vocabulary recognition and morphological restoration** rat
 1. Custom dictionary lookup: Not found
 2. THU complete match: Complete word not found
 3. THU partial match: Found related entries
-   - `ئورۇنلاش. قان لار` 
+   - `ئورۇنلاش. قان لار`
    - `ئورۇنلىش.(ئورۇنلاش) ىش`
 4. **Analysis Result**: Identified as inflected form of compound word
 
@@ -152,7 +152,7 @@ The system performs **vocabulary recognition and morphological restoration** rat
 - **Example**: `يېزىش` → `يازىش`
 - **Usage**: Academic research, historical linguistics analysis
 
-### 2. Split View  
+### 2. Split View
 - **Function**: Maintains modern writing forms
 - **Example**: `يېزىش` → `يېزىش`
 - **Usage**: Modern text processing, search applications
@@ -175,7 +175,7 @@ The system performs **vocabulary recognition and morphological restoration** rat
    ```
    # Basic form
    new_word
-   
+
    # Common inflected forms
    new_word. لار
    new_word. نىڭ
@@ -219,13 +219,13 @@ The system performs **vocabulary recognition and morphological restoration** rat
 ```bash
 # Original form analysis
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_original",
+  "analyzer": "uyghur_original_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 
-# Modern form analysis  
+# Modern form analysis
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```

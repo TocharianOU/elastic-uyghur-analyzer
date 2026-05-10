@@ -140,9 +140,20 @@ public class RuleBasedMorphologyAnalyzer {
             if (longestMatch.length() >= word.length() * 0.6) { // 至少匹配60%
                 String remainder = word.substring(longestMatch.length());
                 
-                // 尝试分析剩余部分
                 List<String> segments = new ArrayList<>();
-                segments.add(longestMatch);
+
+                // If the longest prefix is itself a dictionary entry, expand it first.
+                // This keeps open suffix chains such as ئىشلىگەننىڭ as ئىشلى/ئىشلە + گەن + نىڭ
+                // instead of flattening the known prefix into a single token.
+                String[] prefixSegments = unifiedDictionaryManager.lookup(longestMatch, DictionaryView.CUSTOM);
+                if (prefixSegments == null) {
+                    prefixSegments = unifiedDictionaryManager.lookup(longestMatch, viewType);
+                }
+                if (prefixSegments != null) {
+                    segments.addAll(Arrays.asList(prefixSegments));
+                } else {
+                    segments.add(longestMatch);
+                }
                 
                 if (!remainder.isEmpty()) {
                     // 使用规则分析剩余部分

@@ -41,7 +41,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   "text": "ئائىلىلەرنى"
 }'
 
-#预计输出
+# 预期输出
 # {
 #   "tokens": [
 #     {
@@ -82,7 +82,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   "text": "ئائىلىلەرنى"
 }'
 
-#预计输出
+# 预期输出
 # {
 #   "tokens": [
 #     {
@@ -409,7 +409,7 @@ curl -k -X GET "https://localhost:9200/uyghur_docs/_search" \
     "bool": {
       "must": [
         { "match": { "content": "قانۇنى" }}
-        
+
       ],
       "must_not": [
         { "match": { "content": "كېلىشىم" }}
@@ -547,7 +547,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
 
 ### 问题：某些词形变化无法匹配
 
-**解决方案**：考虑使用 `uyghur_split_analyzer` 或在多字段配置中同时使用两种分析器。（即将更新算法和字典库）
+**解决方案**：考虑使用 `uyghur_split_analyzer`，或在多字段配置中同时使用两种分析器。如果重要领域词仍无法匹配，可以将其加入自定义词典并重新构建插件。
 
 ### 问题：分析器性能问题
 
@@ -559,4 +559,4 @@ curl -k -X POST "https://localhost:9200/_analyze" \
 
 ---
 
-通过本教程，您应该能够充分利用 Elastic Uyghur Analyzer 插件的功能，为维吾尔语文本处理和搜索提供更好的支持。如有更多问题，请参考官方文档或在 GitHub 上提交问题。 
+通过本教程，您应该能够充分利用 Elastic Uyghur Analyzer 插件的功能，为维吾尔语文本处理和搜索提供更好的支持。如有更多问题，请参考官方文档或在 GitHub 上提交问题。

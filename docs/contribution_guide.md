@@ -6,7 +6,8 @@ Thank you for your interest in contributing to the Elasticsearch Uyghur Analyzer
 
 ### Prerequisites
 
-- JDK 17 or higher
+- JDK 17 or higher for Elasticsearch 8.x builds
+- JDK 21 or higher for Elasticsearch 9.x builds
 - Git
 - Basic understanding of Elasticsearch plugins
 - Familiarity with Java and Gradle

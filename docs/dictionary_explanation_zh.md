@@ -107,7 +107,7 @@ src/main/resources/dictionaries/
 # 示例1：元音弱化还原
 يېزىش.(يازىش) قا
 # 现代形式: يېزىش
-# 原始形式: يازىش  
+# 原始形式: يازىش
 # 后缀: قا
 
 # 示例2：复杂后缀组合
@@ -141,7 +141,7 @@ src/main/resources/dictionaries/
 1. 自定义词典查找：未找到
 2. THU完整匹配：未找到完整词汇
 3. THU部分匹配：找到相关条目
-   - `ئورۇنلاش. قان لار` 
+   - `ئورۇنلاش. قان لار`
    - `ئورۇنلىش.(ئورۇنلاش) ىش`
 4. **分析结果**：识别为复合词汇的变位形式
 
@@ -152,7 +152,7 @@ src/main/resources/dictionaries/
 - **示例**：`يېزىش` → `يازىش`
 - **用途**：学术研究、历史语言学分析
 
-### 2. 分割视图 (Split View)  
+### 2. 分割视图 (Split View)
 - **功能**：保持现代书写形式
 - **示例**：`يېزىش` → `يېزىش`
 - **用途**：现代文本处理、搜索应用
@@ -175,7 +175,7 @@ src/main/resources/dictionaries/
    ```
    # 基本形式
    جديد_كلمة
-   
+
    # 常用变位形式
    جديد_كلمة. لار
    جديد_كلمة. نىڭ
@@ -219,13 +219,13 @@ src/main/resources/dictionaries/
 ```bash
 # 原始形式分析
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_original",
+  "analyzer": "uyghur_original_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 
-# 现代形式分析  
+# 现代形式分析
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```

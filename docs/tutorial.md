@@ -41,7 +41,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   "text": "ئائىلىلەرنى"
 }'
 
-#预计输出
+# Expected output
 # {
 #   "tokens": [
 #     {
@@ -82,7 +82,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   "text": "ئائىلىلەرنى"
 }'
 
-#预计输出
+# Expected output
 # {
 #   "tokens": [
 #     {
@@ -475,7 +475,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
 
 ### Problem: Some Word Form Variations Cannot Be Matched
 
-**Solution**: Consider using `uyghur_split_analyzer` or using both analyzers in a multi-field configuration. (Algorithm and dictionary updates coming soon)
+**Solution**: Consider using `uyghur_split_analyzer` or using both analyzers in a multi-field configuration. If important domain terms are still missing, add them to the custom dictionary and rebuild the plugin.
 
 ### Problem: Analyzer Performance Issues
 
@@ -487,4 +487,4 @@ curl -k -X POST "https://localhost:9200/_analyze" \
 
 ---
 
-Through this tutorial, you should be able to fully utilize the features of the Elastic Uyghur Analyzer plugin to provide better support for Uyghur text processing and searching. For more questions, please refer to the official documentation or submit an issue on GitHub. 
+Through this tutorial, you should be able to fully utilize the features of the Elastic Uyghur Analyzer plugin to provide better support for Uyghur text processing and searching. For more questions, please refer to the official documentation or submit an issue on GitHub.

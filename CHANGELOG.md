@@ -3,13 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2.1.0] - 2026-05
+### Added
+- Add recursive dictionary-prefix expansion for open Uyghur suffix chains, so known forms such as `ئىشلىگەن` can be expanded before additional suffixes such as `نىڭ` are appended.
+- Link the standalone `ug-es-benchmark` repository as the reproducible evaluation framework for analyzer quality and retrieval tests.
+
 ### Fixed
-- Ensure `uyghur_original_analyzer` and `uyghur_split_analyzer` pass their selected dictionary view into morphology analysis.
-- Convert the morphology analyzer smoke test into executable JUnit assertions.
-- Correct stale documentation references for dictionary files and repository URLs.
-- Normalize the ES 8 release tag and ZIP artifact name to `v2.0.0` / `uyghur-analyzer-plugin-2.0.0-es8.zip`.
-- Verify the ES 8 stable plugin artifact installs and analyzes successfully on Elasticsearch 8.19.15.
-- Add parameterized Elasticsearch 9.x packaging as `uyghur-analyzer-plugin-2.0.0-es9.zip`, built against the 9.4.0 stable plugin API.
+- Preserve the selected original/split dictionary view when recursively expanding dictionary prefixes.
+- Update release artifact naming and documentation to `v2.1.0` for both Elasticsearch 8.x and 9.x builds.
 
 ## [2.0.0-es8] - 2026-05
 ### Added

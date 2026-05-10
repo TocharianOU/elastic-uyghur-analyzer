@@ -17,7 +17,7 @@
 - **内存**: 建议至少64MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
 
-Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.0.0-es8.zip`，Elasticsearch 9.x 使用 `uyghur-analyzer-plugin-2.0.0-es9.zip`。
+Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.1.0-es8.zip`，Elasticsearch 9.x 使用 `uyghur-analyzer-plugin-2.1.0-es9.zip`。
 
 ## 构建和安装插件
 
@@ -33,21 +33,25 @@ Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.0.0-es8.zip`，Elasticsearch 
    ```bash
    ./gradlew clean check
    ```
-   
+
    构建完成后，插件文件位于 `build/distributions/` 目录。
 
 ### 方法一：直接安装（适用于已有 Elasticsearch 环境）
 
 1. **安装插件**：
    ```bash
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin.zip
+   # Elasticsearch 8.x
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.1.0-es8.zip
+
+   # Elasticsearch 9.x
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.1.0-es9.zip
    ```
 
 2. **重启 Elasticsearch**：
    ```bash
    # 对于基于 systemd 的系统
    systemctl restart elasticsearch
-   
+
    # 或者对于基于 init.d 的系统
    service elasticsearch restart
    ```
@@ -59,13 +63,13 @@ Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.0.0-es8.zip`，Elasticsearch 
    docker run -d --name es -p 9200:9200 -p 9300:9300 \
      -e "discovery.type=single-node" \
      -e "ELASTIC_PASSWORD=your_password" \
-     docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+     docker.elastic.co/elasticsearch/elasticsearch:8.19.15
    ```
 
 2. **复制插件到容器并安装**：
    ```bash
-   docker cp build/distributions/uyghur-analyzer-plugin.zip es:/tmp/
-   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin.zip
+   docker cp build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip es:/tmp/
+   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.1.0-es8.zip
    ```
 
 3. **重启容器**：
@@ -129,7 +133,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   -u elastic:your_password \
   -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_original",
+  "analyzer": "uyghur_original_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
@@ -140,7 +144,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   -u elastic:your_password \
   -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
@@ -151,7 +155,7 @@ curl -k -X POST "https://localhost:9200/_analyze" \
   -u elastic:your_password \
   -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "ئورۇنلاشتۇرۇشلارنى تاكسىدا"
 }'
 ```
@@ -342,7 +346,6 @@ java -cp build/classes/java/test:build/classes/java/main:build/resources/main or
 
 ```yaml
 # 在 elasticsearch.yml 中添加
-logger.org.tocharian: DEBUG
 logger.org.tocharian.uyghur: DEBUG
 ```
 
@@ -352,7 +355,7 @@ curl -k -X POST "https://localhost:9200/_analyze?explain=true" \
   -u elastic:your_password \
   -H "Content-Type: application/json" -d'
 {
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "تېخنىكىلىق"
 }'
 ```

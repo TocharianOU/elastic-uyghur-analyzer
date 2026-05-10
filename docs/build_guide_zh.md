@@ -5,11 +5,13 @@
 ## 前提条件
 
 - JDK 17（与 Elasticsearch 8.7.0 兼容）
+- Elasticsearch 9.x 构建需要 JDK 21 或更高版本
 - Git
-- Gradle 7.6.1（项目已内置，无需单独安装）
+- Elasticsearch 8.x 构建使用项目内置的 Gradle 7.6.1 Wrapper
+- Elasticsearch 9.x 构建使用 Gradle 8.14
 - Docker（用于测试 Elasticsearch）
 
-> **注意**：本项目使用内置的 Gradle Wrapper（版本 7.6.1），它与 JDK 17 兼容。请确保使用正确的 JDK 版本以避免构建问题。
+> **注意**：项目内置的 Gradle Wrapper 版本为 7.6.1，适用于默认的 Elasticsearch 8.x 构建和 JDK 17。Elasticsearch 9.x 构建工具需要更新的 Gradle 运行时以及 Java 21 或更高版本。
 
 ## 构建插件
 
@@ -28,15 +30,17 @@ cd elastic-uyghur-analyzer
 ./gradlew clean check
 ```
 
-插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip` 创建。
+插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip` 创建。
 
-构建 Elasticsearch 9.x 插件包时，使用 Elasticsearch 9.4.0 和 Lucene 10.4.0：
+构建 Elasticsearch 9.x 插件包时，使用 Java 21 或更高版本、Gradle 8.14、Elasticsearch 9.4.0 和 Lucene 10.4.0：
 
 ```bash
-./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+curl -fsSL https://services.gradle.org/distributions/gradle-8.14-bin.zip -o /tmp/gradle-8.14-bin.zip
+unzip -q /tmp/gradle-8.14-bin.zip -d /tmp
+/tmp/gradle-8.14/bin/gradle clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
 ```
 
-Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip` 创建。
+Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.1.0-es9.zip` 创建。
 
 ## 使用 Elasticsearch 进行测试
 
@@ -47,7 +51,7 @@ Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-p
 docker run -d --name es -p 9200:9200 -p 9300:9300 \
   -e "discovery.type=single-node" \
   -e "ELASTIC_PASSWORD=your_password" \
-  docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+  docker.elastic.co/elasticsearch/elasticsearch:8.19.15
 
 # 等待 Elasticsearch 启动
 sleep 30
@@ -57,8 +61,8 @@ sleep 30
 
 ```bash
 # 将插件复制到容器并安装
-docker cp build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.0.0-es8.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.1.0-es8.zip
 
 # 重启 Elasticsearch 以应用插件
 docker restart es
@@ -77,7 +81,7 @@ docker run -d --name kibana -p 5601:5601 \
   -e "ELASTICSEARCH_HOSTS=http://host.docker.internal:9200" \
   -e "ELASTICSEARCH_USERNAME=elastic" \
   -e "ELASTICSEARCH_PASSWORD=your_password" \
-  docker.elastic.co/kibana/kibana:8.7.0
+  docker.elastic.co/kibana/kibana:8.19.15
 ```
 
 ## 测试插件
@@ -151,13 +155,13 @@ docker exec -it --user root kibana /bin/bash
 
 ### Java 版本问题
 
-Elasticsearch 8.7.0 需要 Java 17。如果遇到 Java 版本问题：
+Elasticsearch 8.x 构建需要 Java 17。如果遇到 Java 版本问题：
 
 ```bash
 export JAVA_HOME=/path/to/java17
 ```
 
-如果您在使用 Gradle 构建时遇到版本兼容性问题，请确保使用 JDK 17，因为内置的 Gradle 7.6.1 与此版本兼容。
+如果您在使用 Gradle 构建时遇到版本兼容性问题，请使用 JDK 17 和内置的 Gradle 7.6.1 Wrapper 构建 Elasticsearch 8.x 插件包；使用 Java 21 或更高版本和 Gradle 8.14 构建 Elasticsearch 9.x 插件包。
 
 ### 插件安装失败
 
@@ -189,9 +193,9 @@ docker rm es kibana
 
 ## 其他资源
 
-- [Elasticsearch 8.7.0 文档](https://www.elastic.co/guide/en/elasticsearch/reference/8.7/index.html)
-- [Elasticsearch 插件开发指南](https://www.elastic.co/guide/en/elasticsearch/plugins/8.7/plugin-authors.html)
-- [Elasticsearch 分析插件文档](https://www.elastic.co/guide/en/elasticsearch/plugins/8.7/analysis.html)
+- [Elasticsearch 8.19 文档](https://www.elastic.co/guide/en/elasticsearch/reference/8.19/index.html)
+- [Elasticsearch 插件开发指南](https://www.elastic.co/guide/en/elasticsearch/plugins/8.19/plugin-authors.html)
+- [Elasticsearch 分析插件文档](https://www.elastic.co/guide/en/elasticsearch/plugins/8.19/analysis.html)
 
 ## 支持
 

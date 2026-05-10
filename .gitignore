@@ -5,6 +5,9 @@
 # Log file
 *.log
 
+# OS files
+.DS_Store
+
 # BlueJ files
 *.ctxt
 
@@ -41,3 +44,4 @@ out/
 
 
 FIX_PLAN.local.md
+.claude/

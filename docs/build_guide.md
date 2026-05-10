@@ -5,11 +5,13 @@ This document provides instructions for building, testing, and packaging the Ela
 ## Prerequisites
 
 - JDK 17 (compatible with Elasticsearch 8.7.0)
+- JDK 21 or higher for Elasticsearch 9.x builds
 - Git
-- Gradle 7.6.1 (included in the project, no need to install separately)
+- Gradle 7.6.1 wrapper for Elasticsearch 8.x builds
+- Gradle 8.14 for Elasticsearch 9.x builds
 - Docker (for testing with Elasticsearch)
 
-> **Note**: This project uses the embedded Gradle Wrapper (version 7.6.1) which is compatible with JDK 17. Please ensure you use the correct JDK version to avoid build issues.
+> **Note**: The embedded Gradle Wrapper is version 7.6.1 and is intended for the default Elasticsearch 8.x build with JDK 17. Elasticsearch 9.x build tools require a newer Gradle runtime and Java 21 or higher.
 
 ## Building the Plugin
 
@@ -28,15 +30,17 @@ The plugin is configured to build the Elasticsearch 8.x artifact by default.
 ./gradlew clean check
 ```
 
-The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip`.
+The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip`.
 
-To build the Elasticsearch 9.x artifact, use Elasticsearch 9.4.0 and Lucene 10.4.0:
+To build the Elasticsearch 9.x artifact, use Java 21 or higher, Gradle 8.14, Elasticsearch 9.4.0, and Lucene 10.4.0:
 
 ```bash
-./gradlew clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
+curl -fsSL https://services.gradle.org/distributions/gradle-8.14-bin.zip -o /tmp/gradle-8.14-bin.zip
+unzip -q /tmp/gradle-8.14-bin.zip -d /tmp
+/tmp/gradle-8.14/bin/gradle clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
 ```
 
-The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.0.0-es9.zip`.
+The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.1.0-es9.zip`.
 
 ## Testing with Elasticsearch
 
@@ -47,7 +51,7 @@ The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uy
 docker run -d --name es -p 9200:9200 -p 9300:9300 \
   -e "discovery.type=single-node" \
   -e "ELASTIC_PASSWORD=your_password" \
-  docker.elastic.co/elasticsearch/elasticsearch:8.7.0
+  docker.elastic.co/elasticsearch/elasticsearch:8.19.15
 
 # Wait for Elasticsearch to start
 sleep 30
@@ -57,8 +61,8 @@ sleep 30
 
 ```bash
 # Copy the plugin to the container and install it
-docker cp build/distributions/uyghur-analyzer-plugin-2.0.0-es8.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.0.0-es8.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.1.0-es8.zip
 
 # Restart Elasticsearch to apply the plugin
 docker restart es
@@ -77,7 +81,7 @@ docker run -d --name kibana -p 5601:5601 \
   -e "ELASTICSEARCH_HOSTS=http://host.docker.internal:9200" \
   -e "ELASTICSEARCH_USERNAME=elastic" \
   -e "ELASTICSEARCH_PASSWORD=your_password" \
-  docker.elastic.co/kibana/kibana:8.7.0
+  docker.elastic.co/kibana/kibana:8.19.15
 ```
 
 ## Testing the Plugin
@@ -151,13 +155,13 @@ docker exec -it --user root kibana /bin/bash
 
 ### Java Version Issues
 
-Elasticsearch 8.7.0 requires Java 17. If you encounter Java version issues:
+Elasticsearch 8.x builds require Java 17. If you encounter Java version issues:
 
 ```bash
 export JAVA_HOME=/path/to/java17
 ```
 
-If you encounter version compatibility issues when building with Gradle, make sure to use JDK 17 as the embedded Gradle 7.6.1 is compatible with this version.
+If you encounter version compatibility issues when building with Gradle, use JDK 17 with the embedded Gradle 7.6.1 wrapper for Elasticsearch 8.x artifacts. Use Java 21 or higher with Gradle 8.14 for Elasticsearch 9.x artifacts.
 
 ### Plugin Installation Failures
 
@@ -189,9 +193,9 @@ docker rm es kibana
 
 ## Additional Resources
 
-- [Elasticsearch 8.7.0 Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/8.7/index.html)
-- [Elasticsearch Plugin Development Guide](https://www.elastic.co/guide/en/elasticsearch/plugins/8.7/plugin-authors.html)
-- [Elasticsearch Analysis Plugin Documentation](https://www.elastic.co/guide/en/elasticsearch/plugins/8.7/analysis.html)
+- [Elasticsearch 8.19 Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/8.19/index.html)
+- [Elasticsearch Plugin Development Guide](https://www.elastic.co/guide/en/elasticsearch/plugins/8.19/plugin-authors.html)
+- [Elasticsearch Analysis Plugin Documentation](https://www.elastic.co/guide/en/elasticsearch/plugins/8.19/analysis.html)
 
 ## Support
 

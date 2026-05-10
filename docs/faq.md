@@ -111,13 +111,13 @@ For words not in the dictionary, the system will:
 ```bash
 # Test original analyzer
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_original",
+  "analyzer": "uyghur_original_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 
 # Test split analyzer
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split", 
+  "analyzer": "uyghur_split_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
@@ -125,8 +125,8 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ## Installation and Deployment
 
 ### What are the system requirements?
-- **Elasticsearch**: 8.x (built against the 8.7.0 stable plugin API)
-- **Java**: 17 or higher
+- **Elasticsearch**: 8.x or 9.x
+- **Java**: Java 17 or higher for Elasticsearch 8.x builds; Java 21 or higher for Elasticsearch 9.x builds
 - **Memory**: Recommend at least 512MB for dictionary loading
 - **Storage**: About 50MB for plugin and dictionary files
 
@@ -150,7 +150,7 @@ elasticsearch-plugin list
 
 # Test analyzer
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "سالام دۇنيا"
 }'
 ```
@@ -212,7 +212,6 @@ Solution: Confirm plugin is correctly installed and restart ES
 ### How to enable debug logging?
 Add to `elasticsearch.yml`:
 ```yaml
-logger.org.tocharian: DEBUG
 logger.org.tocharian.uyghur: DEBUG
 ```
 
@@ -246,7 +245,7 @@ logger.org.tocharian.uyghur: DEBUG
 ## Data and Licensing
 
 ### Dictionary data sources?
-- **THU Dataset**: Tsinghua University THUUyMorph project (academic license)
+- **THU Dataset**: Third-party dictionary data derived from Tsinghua University THUUyMorph resources
 - **Custom Vocabulary**: Community contributions (open source license)
 - **Format Standards**: Based on Uyghur morphological analysis conventions
 

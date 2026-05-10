@@ -111,13 +111,13 @@ THU词典包含多种格式：
 ```bash
 # 测试原始分析器
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_original",
+  "analyzer": "uyghur_original_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 
 # 测试分割分析器
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split", 
+  "analyzer": "uyghur_split_analyzer",
   "text": "يېزىشقا كىتابلارنىڭ"
 }'
 ```
@@ -125,8 +125,8 @@ curl -X POST "localhost:9200/_analyze" -d '{
 ## 安装和部署
 
 ### 系统要求是什么？
-- **Elasticsearch**: 8.x（基于 8.7.0 stable plugin API 构建）
-- **Java**: 17 或更高版本
+- **Elasticsearch**: 8.x 或 9.x
+- **Java**: Elasticsearch 8.x 构建需要 Java 17 或更高版本；Elasticsearch 9.x 构建需要 Java 21 或更高版本
 - **内存**: 建议至少512MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
 
@@ -150,7 +150,7 @@ elasticsearch-plugin list
 
 # 测试分析器
 curl -X POST "localhost:9200/_analyze" -d '{
-  "analyzer": "uyghur_split",
+  "analyzer": "uyghur_split_analyzer",
   "text": "سالام دۇنيا"
 }'
 ```
@@ -212,7 +212,6 @@ docker restart es
 ### 如何启用调试日志？
 在 `elasticsearch.yml` 中添加：
 ```yaml
-logger.org.tocharian: DEBUG
 logger.org.tocharian.uyghur: DEBUG
 ```
 
@@ -246,7 +245,7 @@ logger.org.tocharian.uyghur: DEBUG
 ## 数据和许可
 
 ### 词典数据来源？
-- **THU数据集**：清华大学THUUyMorph项目（学术许可）
+- **THU数据集**：基于清华大学 THUUyMorph 资源生成的第三方词典数据
 - **自定义词汇**：社区贡献（开源许可）
 - **格式标准**：基于维吾尔语形态学规范
 

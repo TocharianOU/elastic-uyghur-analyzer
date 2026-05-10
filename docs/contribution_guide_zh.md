@@ -6,7 +6,8 @@
 
 ### 前提条件
 
-- JDK 17 或更高版本
+- Elasticsearch 8.x 构建需要 JDK 17 或更高版本
+- Elasticsearch 9.x 构建需要 JDK 21 或更高版本
 - Git
 - 基本的 Elasticsearch 插件知识
 - 熟悉 Java 和 Gradle
