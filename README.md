@@ -99,7 +99,7 @@ Examples:
 
 ## Evaluation Benchmark
 
-An independent benchmark project is available at [TocharianOU/ug-es-benchmark](https://github.com/TocharianOU/ug-es-benchmark). It provides the full evaluation framework, including corpus parsing, Docker-based Elasticsearch setup, segmentation quality tests, information-retrieval metrics, and a Streamlit UI for comparing analyzer behavior. Detailed benchmark documentation and results are maintained in that repository.
+The independent ES-UG Benchmark project is available at [TocharianOU/es-ug-benchmark](https://github.com/TocharianOU/es-ug-benchmark). It provides the full evaluation framework, including corpus parsing, Docker-based Elasticsearch setup, segmentation quality tests, information-retrieval metrics, and a Streamlit UI for comparing analyzer behavior. Detailed benchmark documentation and results are maintained in that repository.
 
 ## Usage
 

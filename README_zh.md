@@ -99,7 +99,7 @@
 
 ## 评测基准
 
-独立评测项目位于 [TocharianOU/ug-es-benchmark](https://github.com/TocharianOU/ug-es-benchmark)。该仓库提供完整测试框架，包括语料解析、基于 Docker 的 Elasticsearch 启动方式、分词质量评测、信息检索指标，以及用于对比不同 analyzer 行为的 Streamlit UI。详细的评测说明和结果会在该仓库中维护。
+独立评测项目 ES-UG Benchmark 位于 [TocharianOU/es-ug-benchmark](https://github.com/TocharianOU/es-ug-benchmark)。该仓库提供完整测试框架，包括语料解析、基于 Docker 的 Elasticsearch 启动方式、分词质量评测、信息检索指标，以及用于对比不同 analyzer 行为的 Streamlit UI。详细的评测说明和结果会在该仓库中维护。
 
 ## 使用方法
 

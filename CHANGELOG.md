@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 ## [2.1.0] - 2026-05
 ### Added
 - Add recursive dictionary-prefix expansion for open Uyghur suffix chains, so known forms such as `ئىشلىگەن` can be expanded before additional suffixes such as `نىڭ` are appended.
-- Link the standalone `ug-es-benchmark` repository as the reproducible evaluation framework for analyzer quality and retrieval tests.
+- Link the standalone `es-ug-benchmark` repository as the reproducible evaluation framework for analyzer quality and retrieval tests.
 
 ### Fixed
 - Preserve the selected original/split dictionary view when recursively expanding dictionary prefixes.
