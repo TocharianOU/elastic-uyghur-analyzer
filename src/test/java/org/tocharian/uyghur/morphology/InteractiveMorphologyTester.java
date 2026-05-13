@@ -223,6 +223,8 @@ public class InteractiveMorphologyTester {
             case DICTIONARY_EXACT -> "词典精确匹配";
             case DICTIONARY_PARTIAL -> "词典部分匹配";
             case RULE_BASED -> "基于规则分析";
+            case WEIGHTED_MODEL -> "加权模型解码";
+            case OOV_BOUNDARY -> "未登录词边界预测";
             case STATISTICAL -> "统计模型预测";
             case FALLBACK -> "回退策略";
         };

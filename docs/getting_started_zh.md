@@ -17,7 +17,7 @@
 - **内存**: 建议至少64MB用于词典加载
 - **存储**: 约50MB用于插件和词典文件
 
-Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.1.0-es8.zip`，Elasticsearch 9.x 使用 `uyghur-analyzer-plugin-2.1.0-es9.zip`。
+Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.2.0-es8.zip`，Elasticsearch 9.x 使用 `uyghur-analyzer-plugin-2.2.0-es9.zip`。
 
 ## 构建和安装插件
 
@@ -41,10 +41,10 @@ Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.1.0-es8.zip`，Elasticsearch 
 1. **安装插件**：
    ```bash
    # Elasticsearch 8.x
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.1.0-es8.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.2.0-es8.zip
 
    # Elasticsearch 9.x
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.1.0-es9.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.2.0-es9.zip
    ```
 
 2. **重启 Elasticsearch**：
@@ -68,8 +68,8 @@ Elasticsearch 8.x 使用 `uyghur-analyzer-plugin-2.1.0-es8.zip`，Elasticsearch 
 
 2. **复制插件到容器并安装**：
    ```bash
-   docker cp build/distributions/uyghur-analyzer-plugin-2.1.0-es8.zip es:/tmp/
-   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.1.0-es8.zip
+   docker cp build/distributions/uyghur-analyzer-plugin-2.2.0-es8.zip es:/tmp/
+   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.2.0-es8.zip
    ```
 
 3. **重启容器**：

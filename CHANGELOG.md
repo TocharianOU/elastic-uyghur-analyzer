@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-05
+### Added
+- Add a weighted morphology model compiler that derives root, suffix, and suffix-transition costs from the unified dictionary views.
+- Add a Viterbi-style morphology segmenter and OOV suffix-boundary fallback for words not covered by exact dictionary entries.
+- Document the planned weighted FST/Viterbi and OOV boundary prediction architecture.
+
+### Changed
+- Route rule-based fallback analysis through weighted model decoding before using legacy suffix heuristics.
+- Report weighted model statistics in analyzer diagnostics.
+
 ## [2.1.0] - 2026-05
 ### Added
 - Add recursive dictionary-prefix expansion for open Uyghur suffix chains, so known forms such as `ئىشلىگەن` can be expanded before additional suffixes such as `نىڭ` are appended.

@@ -27,7 +27,9 @@ public class MorphologyAnalysisResult {
         DICTIONARY_EXACT,    // 词典精确匹配
         DICTIONARY_PARTIAL,  // 词典部分匹配
         RULE_BASED,         // 基于规则分析
-        STATISTICAL,        // 统计模型预测
+        WEIGHTED_MODEL,     // 加权模型解码
+        OOV_BOUNDARY,       // 未登录词边界预测
+        STATISTICAL,        // 兼容旧名称
         FALLBACK           // 回退策略
     }
     

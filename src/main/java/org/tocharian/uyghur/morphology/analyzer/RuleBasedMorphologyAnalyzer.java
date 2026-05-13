@@ -17,6 +17,11 @@ package org.tocharian.uyghur.morphology.analyzer;
 
 import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager;
 import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
+import org.tocharian.uyghur.morphology.model.OovBoundaryPredictor;
+import org.tocharian.uyghur.morphology.model.SegmentationPath;
+import org.tocharian.uyghur.morphology.model.ViterbiMorphologySegmenter;
+import org.tocharian.uyghur.morphology.model.WeightedModelCompiler;
+import org.tocharian.uyghur.morphology.model.WeightedMorphologyModel;
 import org.tocharian.uyghur.morphology.utils.UyghurCharacterUtils;
 
 import java.io.IOException;
@@ -30,6 +35,9 @@ import java.util.*;
 public class RuleBasedMorphologyAnalyzer {
     
     private final UnifiedDictionaryManager unifiedDictionaryManager;
+    private ViterbiMorphologySegmenter weightedSegmenter;
+    private OovBoundaryPredictor oovBoundaryPredictor;
+    private WeightedMorphologyModel weightedModel;
     private boolean initialized = false;
     
     // 分析策略权重
@@ -50,6 +58,9 @@ public class RuleBasedMorphologyAnalyzer {
         if (!initialized || !unifiedDictionaryManager.isInitialized()) {
             // 初始化统一词典管理器
             unifiedDictionaryManager.initialize();
+            weightedModel = new WeightedModelCompiler().compile(unifiedDictionaryManager);
+            weightedSegmenter = new ViterbiMorphologySegmenter(weightedModel);
+            oovBoundaryPredictor = OovBoundaryPredictor.suffixBackoff(weightedModel);
             initialized = true;
         }
     }
@@ -174,6 +185,13 @@ public class RuleBasedMorphologyAnalyzer {
      * 策略3: 基于规则分析
      */
     private MorphologyAnalysisResult tryRuleBasedAnalysis(String word) {
+        SegmentationPath path = weightedSegmenter.segment(word);
+        if (path.hasSplit()) {
+            return new MorphologyAnalysisResult(word, path.getSegments(),
+                path.toConfidence(), MorphologyAnalysisResult.AnalysisMethod.WEIGHTED_MODEL,
+                path.getNotes());
+        }
+
         List<String> segments = analyzeByMorphologicalRules(word);
         
         if (segments.size() > 1) {
@@ -190,14 +208,12 @@ public class RuleBasedMorphologyAnalyzer {
      * 策略4: 统计模型预测
      */
     private MorphologyAnalysisResult tryStatisticalAnalysis(String word) {
-        // 简化的统计分析：基于常见后缀模式
-        List<String> segments = analyzeByCommonPatterns(word);
+        SegmentationPath path = oovBoundaryPredictor.predict(word);
         
-        if (segments.size() > 1) {
-            double confidence = calculateStatisticalConfidence(segments);
-            return new MorphologyAnalysisResult(word, segments, 
-                confidence, MorphologyAnalysisResult.AnalysisMethod.STATISTICAL, 
-                "基于统计模式预测");
+        if (path.hasSplit()) {
+            return new MorphologyAnalysisResult(word, path.getSegments(), 
+                path.toConfidence(), MorphologyAnalysisResult.AnalysisMethod.OOV_BOUNDARY, 
+                path.getNotes());
         }
         
         return null;
@@ -332,6 +348,11 @@ public class RuleBasedMorphologyAnalyzer {
         
         if (initialized) {
             stats.putAll(unifiedDictionaryManager.getStatistics());
+            stats.put("weighted_model", Map.of(
+                "roots", weightedModel.rootCount(),
+                "suffixes", weightedModel.suffixCount(),
+                "transitions", weightedModel.transitionCount()
+            ));
         }
         
         return stats;
