@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-05
+### Added
+- Add a curated Uyghur affix inventory resource with archiforms, surface variants, grammatical categories, morphotactic slots, harmony classes, and suffix/clitic distinctions.
+- Add Java model and loader APIs for querying affixes by id, surface form, category, and slot.
+- Add unit coverage for affix inventory loading, harmony-variant indexing, clitic classification, and slot queries.
+
 ## [2.2.0] - 2026-05
 ### Added
 - Add a weighted morphology model compiler that derives root, suffix, and suffix-transition costs from the unified dictionary views.

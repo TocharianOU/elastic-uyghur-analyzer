@@ -17,7 +17,7 @@ This guide provides quick installation and usage instructions for the Elasticsea
 - **Memory**: Recommend at least 64MB for dictionary loading
 - **Storage**: About 50MB for plugin and dictionary files
 
-Use `uyghur-analyzer-plugin-2.2.0-es8.zip` for Elasticsearch 8.x and `uyghur-analyzer-plugin-2.2.0-es9.zip` for Elasticsearch 9.x.
+Use `uyghur-analyzer-plugin-2.3.0-es8.zip` for Elasticsearch 8.x and `uyghur-analyzer-plugin-2.3.0-es9.zip` for Elasticsearch 9.x.
 
 ## Building and Installing the Plugin
 
@@ -41,10 +41,10 @@ Use `uyghur-analyzer-plugin-2.2.0-es8.zip` for Elasticsearch 8.x and `uyghur-ana
 1. **Install the plugin**:
    ```bash
    # Elasticsearch 8.x
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.2.0-es8.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.3.0-es8.zip
 
    # Elasticsearch 9.x
-   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.2.0-es9.zip
+   elasticsearch-plugin install file:///path/to/uyghur-analyzer-plugin-2.3.0-es9.zip
    ```
 
 2. **Restart Elasticsearch**:
@@ -68,8 +68,8 @@ Use `uyghur-analyzer-plugin-2.2.0-es8.zip` for Elasticsearch 8.x and `uyghur-ana
 
 2. **Copy the plugin to the container and install it**:
    ```bash
-   docker cp build/distributions/uyghur-analyzer-plugin-2.2.0-es8.zip es:/tmp/
-   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.2.0-es8.zip
+   docker cp build/distributions/uyghur-analyzer-plugin-2.3.0-es8.zip es:/tmp/
+   docker exec -it -u root es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.3.0-es8.zip
    ```
 
 3. **Restart the container**:
