@@ -369,8 +369,23 @@ public class RuleBasedMorphologyAnalyzer {
         if (remainder.length() <= 2) {
             return Arrays.asList(remainder);
         }
+
+        // In dictionary-partial analysis the remainder may already be one suffix
+        // after a known prefix, e.g. ئىشلىگەن + نىڭ. Keep that boundary intact.
+        if (containsSurface(tsvSuffixSurfaces, remainder) || containsSurface(tsvCliticSurfaces, remainder)) {
+            return Arrays.asList(remainder);
+        }
         
         return analyzeByMorphologicalRules(remainder);
+    }
+
+    private static boolean containsSurface(String[] surfaces, String target) {
+        for (String surface : surfaces) {
+            if (surface.equals(target)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
