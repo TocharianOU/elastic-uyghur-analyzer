@@ -45,14 +45,19 @@ public class UnifiedDictionaryManager {
     
     // THU格式解析正则表达式
     private static final Pattern THU_PATTERN = Pattern.compile("^([^.()]+)\\.(\\([^)]+\\))\\s+(.+)$");  // 完整格式：词根.(原始) 后缀
-    private static final Pattern THU_SIMPLE_PATTERN = Pattern.compile("^([^.()]+)\\s+(.+)$");          // 简单格式：词根 后缀
-    private static final Pattern THU_DOT_PATTERN = Pattern.compile("^([^.()]+)\\.\\s+(.+)$");         // 点号格式：词根. 后缀
-    
+    // B1 fix: use \S+ so multi-token entries like "ئارزۇ سى دىكى" don't bleed into the stem group
+    private static final Pattern THU_SIMPLE_PATTERN = Pattern.compile("^(\\S+)\\s+(.+)$");              // 简单格式：词根 后缀
+    private static final Pattern THU_DOT_PATTERN = Pattern.compile("^([^.()]+)\\.\\s+(.+)$");           // 点号格式：词根. 后缀
+
     // 三个视图：原始、分割、自定义
     private Map<String, String[]> originalView;    // 元音修复形式
     private Map<String, String[]> splitView;       // 现代形式
     private Map<String, String[]> customView;      // 用户自定义
-    
+
+    // F1: 词干级规范形索引：书写词干（元音弱化后）→ 规范词干（弱化前还原）
+    // 来源：THUUyMorph 括号条目，如 ئائىلى.(ئائىلە) → ئائىلى→ئائىلە
+    private Map<String, String> stemCanonicalIndex;
+
     // 原始THU数据存储
     private Map<String, String> rawThuData;
     
@@ -62,6 +67,7 @@ public class UnifiedDictionaryManager {
         this.originalView = new HashMap<>();
         this.splitView = new HashMap<>();
         this.customView = new HashMap<>();
+        this.stemCanonicalIndex = new HashMap<>();
         this.rawThuData = new HashMap<>();
     }
 
@@ -237,7 +243,11 @@ public class UnifiedDictionaryManager {
             // 两个视图使用相同Key，但分割结果不同
             splitView.put(unifiedKey, modernSegments);
             originalView.put(unifiedKey, originalSegments);
-            
+
+            // F1: 记录词干级还原映射（书写词干 → 规范词干）
+            // 用于 OOV 层拆分后的 original 视图词干还原
+            stemCanonicalIndex.putIfAbsent(modernForm, originalForm);
+
             return;
         }
         
@@ -349,9 +359,20 @@ public class UnifiedDictionaryManager {
      * 检查词汇是否存在于任何视图中
      */
     public boolean containsWord(String word) {
-        return customView.containsKey(word) || 
-               originalView.containsKey(word) || 
+        return customView.containsKey(word) ||
+               originalView.containsKey(word) ||
                splitView.containsKey(word);
+    }
+
+    /**
+     * F1: 查询词干的规范形（元音弱化还原）。
+     * 仅在 original 视图下由 OOV 层调用，用于将书写词干还原为弱化前的规范形。
+     * 例如：ئائىلى → ئائىلە，ئاتى → ئاتا
+     *
+     * @return 规范词干，若无记录则返回 null（调用方退化为 split 输出）
+     */
+    public String lookupCanonicalStem(String writtenStem) {
+        return stemCanonicalIndex.get(writtenStem);
     }
     
     /**
@@ -417,10 +438,11 @@ public class UnifiedDictionaryManager {
         stats.put("originalView", originalView.size());
         stats.put("splitView", splitView.size());
         stats.put("customView", customView.size());
+        stats.put("stemCanonicalIndex", stemCanonicalIndex.size());
         stats.put("rawThuData", rawThuData.size());
         return stats;
     }
-    
+
     /**
      * 清空所有数据
      */
@@ -428,6 +450,7 @@ public class UnifiedDictionaryManager {
         originalView.clear();
         splitView.clear();
         customView.clear();
+        stemCanonicalIndex.clear();
         rawThuData.clear();
         initialized = false;
     }

@@ -5,6 +5,7 @@ N_POSS_1PL	-(I)miz	مىز|ىمىز|ۇمىز|ۈمىز	POSS.1PL	N2	SUFFIX	I	ug-stu
 N_POSS_2SG_INF	-(I)ng	ڭ|ىڭ|ۇڭ|ۈڭ	POSS.2SG.INF	N2	SUFFIX	I	ug-study:nominal-possessive	Informal second-person singular possessive.
 N_POSS_2SG_POL	-(I)ngiz	ڭىز|ىڭىز|ۇڭىز|ۈڭىز	POSS.2SG.POL	N2	SUFFIX	I	ug-study:nominal-possessive	Polite second-person singular possessive.
 N_POSS_2PL_INF	-(I)nglar	ڭلار|ىڭلار|ۇڭلار|ۈڭلار	POSS.2PL.INF	N2	SUFFIX	I+A	ug-study:nominal-possessive	Informal second-person plural possessive.
+N_POSS_2PL_POL	-(I)ngizlar	ڭىزلار|ىڭىزلار|ۇڭىزلار|ۈڭىزلار	POSS.2PL.POL	N2	SUFFIX	I+A	ug-study:nominal-possessive	Polite second-person plural possessive.
 N_POSS_3	-(s)i	ى|سى	POSS.3	N2	SUFFIX	I	ug-study:nominal-possessive	Third-person possessive; may trigger buffer n before case.
 N_POSS_3PL	-liri	لىرى|لىرى	POSS.3PL	N2	SUFFIX	A+I	ug-study:nominal-possessive	Third-person plural possessive or respectful possessor.
 N_GEN	-ning	نىڭ	GEN	N3	SUFFIX	INVARIANT	ug-study:case	Genitive case.
@@ -16,12 +17,15 @@ N_LOC_QUAL	-DiKi	دىكى|تىكى	LOC.QUAL	N3Q	SUFFIX	D+I	ug-study:quasi-case	L
 N_LIMIT	-GiCHe	غىچە|قىچە|گىچە|كىچە	LIMIT	N3Q	SUFFIX	G+I	ug-study:quasi-case	Limitative/terminative quasi-case.
 N_SIMIL	-Dek	دەك|تەك	SIMIL	N3Q	SUFFIX	D+A	ug-study:quasi-case	Similitude/equative quasi-case.
 N_EQ_CHE	-che	چە	EQUATIVE	N3Q	SUFFIX	INVARIANT	ug-study:quasi-case	Equivalence or degree marker.
+N_DEG_RAK	-rAK	راق|رەك	DEGREE.COMP	Ndeg	SUFFIX	A	ug-study:degree	Comparative degree suffix "more/somewhat"; 7 THUUyMorph attestations after dot (e.g. ئاجىز.راق، ياخشى.راق). Follows adjective stem; nominal suffixes may follow.
+N_DEG_GINA	-GinA	غىنا|گىنە|قىنا|كىنە	DEGREE.DIM	Ndeg	SUFFIX	G+I	ug-study:degree	Diminutive/attenuative degree "a little, slightly"; per THUUyMorph principle "减弱和增强级要切分". 1 dictionary attestation: قىسقى.(قىسقا) غىنا.
 N_PRED_1SG	-men	مەن	PRED.1SG	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Nominal predicative first-person singular.
 N_PRED_1PL	-miz	مىز	PRED.1PL	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Nominal predicative first-person plural.
 N_PRED_2SG_INF	-sen	سەن	PRED.2SG.INF	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Nominal predicative informal second-person singular.
 N_PRED_2SG_POL	-siz	سىز	PRED.2SG.POL	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Nominal predicative polite second-person singular.
-N_PRED_2SG_RESP	-la	لا	PRED.2SG.RESP	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Respectful nominal predicative form.
+N_PRED_2SG_RESP	-la	لا	PRED.2SG.RESP	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Respectful nominal predicative form. WARNING: homomorphous with derivational -lA (名→动 denominal verb affix, e.g. تۇزلا); requires dictionary disambiguation — do NOT strip when surface is a known verbal stem.
 N_PRED_2PL_INF	-siler	سىلەر	PRED.2PL.INF	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Informal second-person plural predicative.
+N_PRED_2PL_POL	-sizlar	سىزلار	PRED.2PL.POL	N4	SUFFIX	INVARIANT	ug-study:predicative-person	Polite second-person plural predicative.
 N_PRED_3	-dur	دۇر|تۇر	PRED.3	N4	SUFFIX	D+U	ug-study:predicative-person	Third-person assertive predicative; often zero in present tense.
 CL_Q_MU	=mu	مۇ|مۇ|مى	Q.POLAR	C1	CLITIC	U	ug-study:question-clitics	Polar question and additive clitic.
 CL_CHU	=chu	چۇ	Q.CONTRAST	C1	CLITIC	INVARIANT	ug-study:question-clitics	Contrastive question clitic.
@@ -49,18 +53,23 @@ V_IMPF_PAST_ATTI	-Atti	اتتى|ەتتى	PAST.IMPERF	V5	SUFFIX	A+D	ug-study:tens
 V_AORIST_AR	-(A)r	ار|ەر	AORIST	V5	SUFFIX	A	ug-study:tense-mood	Aorist/imperfect participial form.
 V_INTENT_MAKCHI	-mAKchi	ماقچى|مەكچى	INTENT	V5	SUFFIX	A+K	ug-study:tense-mood	Intentional form.
 V_EVID_IPTI	-(I)pti	ىپتۇ|ۇپتۇ|ۈپتۇ|ىپتى	PAST.EVID	V5	SUFFIX	I	ug-study:tense-mood	Indirect/evidential past based on -(I)p.
+V_EVID_IKEN	-iken	ئىكەن	EVID.INDIRECT	V5	SUFFIX	INVARIANT	ug-study:tense-mood	Indirect evidential/reportative mood marker; attaches after tense base (e.g. يازغان+ئىكەن "apparently he wrote").
 V_IMP_1SG	-(A)y	اي|ەي	IMP.1SG	V5	SUFFIX	A	ug-study:mood	Imperative/optative first-person singular.
 V_IMP_1PL	-(A)yli	ايلى|ەيلى	IMP.1PL	V5	SUFFIX	A	ug-study:mood	Imperative/optative first-person plural.
 V_IMP_2POL	-(I)ng	ىڭ|ۇڭ|ۈڭ	IMP.2SG.POL	V5	SUFFIX	I	ug-study:mood	Polite second-person imperative.
 V_IMP_3	-sun	سۇن|سۈن	IMP.3	V5	SUFFIX	U	ug-study:mood	Third-person imperative.
 V_IMP_FAMILIAR	-Gin	غىن|قىن|گىن|كىن	IMP.FAMILIAR	V5	SUFFIX	G+I	ug-study:mood	Familiar imperative particle.
 V_COND	-sA	سا|سە	COND	V5	SUFFIX	A	ug-study:mood	Conditional/hypothetical.
+V_COND_SAIKEN	-sAiken	سايكەن|سەيكەن	COND.OPTATIVE	V5	SUFFIX	A	ug-study:mood	Optative "would that / if only"; combination of -sA + iken (e.g. بارسايكەن "I wish he would go").
+V_COND_SAIDI	-sAidi	سائىدى|سەئىدى	COND.IRREALIS	V5	SUFFIX	A	ug-study:mood	Counterfactual/irrealis "if only...had"; combination of -sA + idi (e.g. بارسائىدى "if only he had gone").
+V_IMP_2PL_RESP	-(I)shsila	ىشسىلا|ۇشسىلا|ۈشسىلا	IMP.2PL.RESP	V5	SUFFIX	I	ug-study:mood	Respectful 2pl imperative (e.g. بارىشسىلا "please go [plural/respectful]").
 V_CONV_IP	-(I)p	ىپ|ۇپ|ۈپ|پ	CVB.SEQ	V6	SUFFIX	I	ug-study:converb	Sequential converb.
 V_CONV_ISHTIN	-(I)shtin	ىشتىن|ۇشتىن|ۈشتىن	CVB.BEFORE	V6	SUFFIX	I	ug-study:converb	Before doing converb.
 V_CONV_A_Y	-A/y	ا|ە|ي	CVB.SIMUL	V6	SUFFIX	A	ug-study:converb	Simultaneous or reduplicative converb.
 V_CONV_GACH	-GAch	غاچ|قاچ|گەچ|كەچ	CVB.SIMUL.CAUSAL	V6	SUFFIX	G+A	ug-study:converb	Simultaneous/causal converb.
 V_CONV_GILI	-Gili	غىلى|قىلى|گىلى|كىلى	CVB.PURPOSE	V6	SUFFIX	G+I	ug-study:converb	Purpose converb or elapsed-time marker.
 V_CONV_GUCHE	-GUche	غۇچە|قۇچە|گۈچە|كۈچە	CVB.UNTIL	V6	SUFFIX	G+U	ug-study:converb	Until converb.
+V_CONV_GANSERI	-GAnsëri	غانسېرى|گەنسېرى|قانسېرى|كەنسېرى	CVB.PROPOR	V6	SUFFIX	G+A	ug-study:converb	Proportional converb "the more X, the more Y"; always follows -GAn participial base (e.g. ئوقۇغانسېرى بىلىمى ئارتىدۇ).
 V_PTCP_WATQAN	-(I)watqan	ىۋاتقان|ۇۋاتقان|ۈۋاتقان	PTCP.CONT	V7	SUFFIX	I	ug-study:participle	Continuous participle.
 V_PTCP_DIGHAN	-(y)dighan	ىدىغان|يدىغان|ايدىغان	PTCP.IMPERF	V7	SUFFIX	I	ug-study:participle	Imperfect/habitual/future participle.
 V_PTCP_GUCHI	-GUchi	غۇچى|قۇچى|گۈچى|كۈچى	PTCP.AGENT	V7	SUFFIX	G+U	ug-study:participle	Agentive participle.
@@ -69,4 +78,5 @@ V_VN_MAK	-mAK	ماق|مەك	VN.INF	V8	SUFFIX	A+K	ug-study:verbal-noun	Formal inf
 V_VN_GU	-GU	غۇ|قۇ|گۈ|كۈ	VN.PURP	V8	SUFFIX	G+U	ug-study:verbal-noun	Instrumental or desiderative verbal noun.
 V_VN_GANLIK	-GAnliK	غانلىق|قانلىق|گەنلىك|كەنلىك	VN.PERF	V8	SUFFIX	G+A	ug-study:verbal-noun	Completed-event verbal noun.
 V_VN_DIGHANLIK	-(y)dighanliK	ىدىغانلىق|يدىغانلىق|ايدىغانلىق	VN.IMPERF	V8	SUFFIX	I	ug-study:verbal-noun	Imperfect-event verbal noun.
+V_VN_WATQANLIK	-(I)watqanliK	ىۋاتقانلىق|ۇۋاتقانلىق|ۈۋاتقانلىق	VN.CONT	V8	SUFFIX	I	ug-study:verbal-noun	Progressive/continuous verbal noun (e.g. يازىۋاتقانلىقى+نى بىلىمەن).
 V_MODAL_GUDEK	-GUdek	غۇدەك|قۇدەك|گۈدەك|كۈدەك	MOD.POTENTIAL	V9	SUFFIX	G+U	ug-study:modal	Modal degree or potential marker.

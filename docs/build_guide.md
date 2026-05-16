@@ -30,7 +30,7 @@ The plugin is configured to build the Elasticsearch 8.x artifact by default.
 ./gradlew clean check
 ```
 
-The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.3.0-es8.zip`.
+The plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.4.0-es8.zip`.
 
 To build the Elasticsearch 9.x artifact, use Java 21 or higher, Gradle 8.14, Elasticsearch 9.4.0, and Lucene 10.4.0:
 
@@ -40,7 +40,7 @@ unzip -q /tmp/gradle-8.14-bin.zip -d /tmp
 /tmp/gradle-8.14/bin/gradle clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
 ```
 
-The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.3.0-es9.zip`.
+The Elasticsearch 9.x plugin ZIP file will be created at `build/distributions/uyghur-analyzer-plugin-2.4.0-es9.zip`.
 
 ## Testing with Elasticsearch
 
@@ -61,8 +61,8 @@ sleep 30
 
 ```bash
 # Copy the plugin to the container and install it
-docker cp build/distributions/uyghur-analyzer-plugin-2.3.0-es8.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.3.0-es8.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.4.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.4.0-es8.zip
 
 # Restart Elasticsearch to apply the plugin
 docker restart es

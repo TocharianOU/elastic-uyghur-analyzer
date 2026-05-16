@@ -15,6 +15,9 @@
 
 package org.tocharian.uyghur.morphology.analyzer;
 
+import org.tocharian.uyghur.morphology.affix.AffixDefinition;
+import org.tocharian.uyghur.morphology.affix.AffixKind;
+import org.tocharian.uyghur.morphology.affix.UyghurAffixInventory;
 import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager;
 import org.tocharian.uyghur.morphology.dictionary.UnifiedDictionaryManager.DictionaryView;
 import org.tocharian.uyghur.morphology.model.OovBoundaryPredictor;
@@ -38,6 +41,11 @@ public class RuleBasedMorphologyAnalyzer {
     private ViterbiMorphologySegmenter weightedSegmenter;
     private OovBoundaryPredictor oovBoundaryPredictor;
     private WeightedMorphologyModel weightedModel;
+
+    // F3/F4a: TSV-driven suffix and clitic surface lists (replace hardcoded array)
+    private String[] tsvSuffixSurfaces = new String[0];   // kind=SUFFIX, sorted longest-first
+    private String[] tsvCliticSurfaces = new String[0];   // kind=CLITIC, sorted longest-first
+
     private boolean initialized = false;
     
     // 分析策略权重
@@ -58,11 +66,38 @@ public class RuleBasedMorphologyAnalyzer {
         if (!initialized || !unifiedDictionaryManager.isInitialized()) {
             // 初始化统一词典管理器
             unifiedDictionaryManager.initialize();
+
+            // F3/F4a/F4b: 加载 TSV 词缀库，构建后缀列表和 slot 约束
+            UyghurAffixInventory affixInventory = UyghurAffixInventory.loadDefault();
+            tsvSuffixSurfaces = buildSortedSurfaces(affixInventory, AffixKind.SUFFIX);
+            tsvCliticSurfaces = buildSortedSurfaces(affixInventory, AffixKind.CLITIC);
+
             weightedModel = new WeightedModelCompiler().compile(unifiedDictionaryManager);
-            weightedSegmenter = new ViterbiMorphologySegmenter(weightedModel);
+            // F4b: pass affixInventory so Viterbi gains slot-order constraints
+            weightedSegmenter = new ViterbiMorphologySegmenter(weightedModel, affixInventory);
             oovBoundaryPredictor = OovBoundaryPredictor.suffixBackoff(weightedModel);
             initialized = true;
         }
+    }
+
+    /**
+     * F3 helper: collect all surface forms of a given AffixKind from the TSV,
+     * deduplicate, then sort longest-first for greedy matching.
+     *
+     * <p>Surfaces marked with a WARNING in their note (e.g. N_PRED_2SG_RESP / -la)
+     * are excluded because they are homomorphic with derivational affixes and
+     * require dictionary-backed disambiguation rather than blind stripping.
+     */
+    private static String[] buildSortedSurfaces(UyghurAffixInventory inventory, AffixKind kind) {
+        Set<String> seen = new LinkedHashSet<>();
+        for (AffixDefinition def : inventory.all()) {
+            if (def.getKind() != kind) continue;
+            if (def.getNote().contains("WARNING")) continue;  // skip ambiguous entries
+            seen.addAll(def.getSurfaces());
+        }
+        List<String> list = new ArrayList<>(seen);
+        list.sort(Comparator.comparingInt(String::length).reversed());
+        return list.toArray(new String[0]);
     }
     
     /**
@@ -99,16 +134,18 @@ public class RuleBasedMorphologyAnalyzer {
             return partialMatch;
         }
         
-        // 策略3: 基于规则分析
+        // 策略3: 基于规则分析（Viterbi + 形态规则）
         MorphologyAnalysisResult ruleBasedResult = tryRuleBasedAnalysis(word);
         if (ruleBasedResult != null) {
-            return ruleBasedResult;
+            // F2: OOV 层结果不经过词典，需要事后查词干规范形
+            return applyStemCanonical(ruleBasedResult, viewType);
         }
-        
-        // 策略4: 统计模型预测
+
+        // 策略4: OOV 后缀回退预测
         MorphologyAnalysisResult statisticalResult = tryStatisticalAnalysis(word);
         if (statisticalResult != null) {
-            return statisticalResult;
+            // F2: 同上
+            return applyStemCanonical(statisticalResult, viewType);
         }
         
         // 策略5: 回退策略
@@ -221,37 +258,54 @@ public class RuleBasedMorphologyAnalyzer {
     
     /**
      * 基于形态学规则分析词汇
+     *
+     * <p>F4c: 先剥离 TSV SUFFIX 词尾，再剥离 CLITIC 附接词（附接词出现在所有词尾之后）。
      */
     private List<String> analyzeByMorphologicalRules(String word) {
         return analyzeByCommonPatterns(word);
     }
-    
+
     /**
-     * 基于常见模式分析词汇
+     * F3: TSV 驱动的后缀剥离，替换原来的硬编码列表。
+     *
+     * <p>剥离顺序：
+     * 1. 从右到左贪心剥离 CLITIC（附接词，如 مۇ، چى）—— 附接词位于最外层
+     * 2. 从右到左贪心剥离 SUFFIX（词尾），带元音和谐律校验
+     *
+     * <p>不含派生词缀（构词词缀如 لىق、سىز 已从 TSV 中排除）。
+     * 不含 WARNING 条目（如 -la，与派生词缀同形）。
      */
     private List<String> analyzeByCommonPatterns(String word) {
-        List<String> segments = new ArrayList<>();
+        List<String> suffixSegments = new ArrayList<>();
+        List<String> cliticSegments = new ArrayList<>();
         String remaining = word;
-        
-        // 常见维吾尔语后缀（按长度递减）
-        String[] commonSuffixes = {
-            "لىرى", "لار", "نىڭ", "دىن", "غا", "نى", "دا", "تا", "كە", 
-            "لىق", "سىز", "چان", "گەر", "لەر", "ىدە", "ىنى", "ىغا",
-            "ىش", "ەر", "ان", "ەن", "ىم", "سى", "ى", "لا", "نا", 
-            "دا", "تا", "گە", "كە", "نى", "نا", "ما", "با"
-        };
-        
+
+        // Step 1: 先从最右侧剥离 CLITIC（附接词不参与元音和谐，直接匹配）
+        if (tsvCliticSurfaces.length > 0) {
+            boolean found = true;
+            while (found && remaining.length() > 2) {
+                found = false;
+                for (String clitic : tsvCliticSurfaces) {
+                    if (clitic.length() < remaining.length() && remaining.endsWith(clitic)) {
+                        cliticSegments.add(0, clitic);
+                        remaining = remaining.substring(0, remaining.length() - clitic.length());
+                        found = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Step 2: 剥离 SUFFIX 词尾，带元音和谐律校验
+        String[] suffixList = tsvSuffixSurfaces.length > 0 ? tsvSuffixSurfaces : LEGACY_SUFFIX_FALLBACK;
         boolean foundSuffix = true;
         while (foundSuffix && remaining.length() > 2) {
             foundSuffix = false;
-            
-            for (String suffix : commonSuffixes) {
-                if (remaining.endsWith(suffix) && remaining.length() > suffix.length()) {
+            for (String suffix : suffixList) {
+                if (suffix.length() < remaining.length() && remaining.endsWith(suffix)) {
                     String potentialRoot = remaining.substring(0, remaining.length() - suffix.length());
-                    
-                    // 检查元音和谐律
                     if (checkVowelHarmony(potentialRoot, suffix)) {
-                        segments.add(0, suffix); // 添加到开头
+                        suffixSegments.add(0, suffix);
                         remaining = potentialRoot;
                         foundSuffix = true;
                         break;
@@ -259,12 +313,53 @@ public class RuleBasedMorphologyAnalyzer {
                 }
             }
         }
-        
+
+        // 组装：词干 + 词尾序列 + 附接词序列
+        List<String> segments = new ArrayList<>();
         if (!remaining.isEmpty()) {
-            segments.add(0, remaining); // 词根添加到最前面
+            segments.add(remaining);
         }
-        
+        segments.addAll(suffixSegments);
+        segments.addAll(cliticSegments);
         return segments;
+    }
+
+    /**
+     * 应急回退：TSV 未加载时使用的纯词尾列表（已移除派生词缀 لىق、سىز、چان、گەر）。
+     */
+    private static final String[] LEGACY_SUFFIX_FALLBACK = {
+        "لىرى", "لەر", "لار", "نىڭ", "دىن", "دەن", "تىن", "تەن",
+        "غا", "گە", "قا", "كە", "نى", "دا", "دە", "تا", "تە",
+        "ىدە", "ىنى", "ىغا", "ىش", "ەر", "ان", "ەن", "ىم", "سى", "ى"
+    };
+
+    /**
+     * F2: 将 OOV 层（L3/L4）分析结果里的书写词干替换为规范形（元音弱化还原）。
+     *
+     * <p>仅在 viewType == ORIGINAL 时生效；若词干不在 stemCanonicalIndex 中则原样返回。
+     */
+    private MorphologyAnalysisResult applyStemCanonical(MorphologyAnalysisResult result, DictionaryView viewType) {
+        if (result == null || viewType != DictionaryView.ORIGINAL) {
+            return result;
+        }
+        List<String> morphemes = result.getMorphemes();
+        if (morphemes == null || morphemes.isEmpty()) {
+            return result;
+        }
+        String writtenStem = morphemes.get(0);
+        String canonical = unifiedDictionaryManager.lookupCanonicalStem(writtenStem);
+        if (canonical == null || canonical.equals(writtenStem)) {
+            return result;
+        }
+        List<String> restored = new ArrayList<>(morphemes);
+        restored.set(0, canonical);
+        return new MorphologyAnalysisResult(
+            result.getOriginalWord(),
+            restored,
+            result.getConfidence(),
+            result.getMethod(),
+            result.getNotes() + " [stem-canonical:" + writtenStem + "→" + canonical + "]"
+        );
     }
     
     /**

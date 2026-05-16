@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-05
+### Added
+- Use the curated TSV affix inventory directly in fallback morphology analysis for suffix and clitic segmentation.
+- Add TSV-driven slot-order penalties to Viterbi morphology decoding.
+- Add OOV canonical stem restoration for the original analyzer view.
+- Extend the Uyghur affix inventory with additional possessive, degree, evidential, conditional, imperative, converb, and verbal-noun forms.
+
+### Changed
+- Replace the legacy hardcoded fallback suffix list with suffix and clitic surfaces loaded from the affix inventory, keeping a smaller emergency fallback list if the TSV resource is unavailable.
+- Exclude ambiguous warning-marked affix surfaces from blind fallback stripping.
+
+### Fixed
+- Tighten THUUyMorph simple-format parsing so multi-token entries do not bleed into the stem group.
+
 ## [2.3.0] - 2026-05
 ### Added
 - Add a curated Uyghur affix inventory resource with archiforms, surface variants, grammatical categories, morphotactic slots, harmony classes, and suffix/clitic distinctions.
