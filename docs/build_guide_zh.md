@@ -30,7 +30,7 @@ cd elastic-uyghur-analyzer
 ./gradlew clean check
 ```
 
-插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.4.0-es8.zip` 创建。
+插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.5.0-es8.zip` 创建。
 
 构建 Elasticsearch 9.x 插件包时，使用 Java 21 或更高版本、Gradle 8.14、Elasticsearch 9.4.0 和 Lucene 10.4.0：
 
@@ -40,7 +40,7 @@ unzip -q /tmp/gradle-8.14-bin.zip -d /tmp
 /tmp/gradle-8.14/bin/gradle clean check -PesMajor=9 -PelasticsearchVersion=9.4.0 -PluceneVersion=10.4.0
 ```
 
-Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.4.0-es9.zip` 创建。
+Elasticsearch 9.x 插件 ZIP 文件将在 `build/distributions/uyghur-analyzer-plugin-2.5.0-es9.zip` 创建。
 
 ## 使用 Elasticsearch 进行测试
 
@@ -61,8 +61,8 @@ sleep 30
 
 ```bash
 # 将插件复制到容器并安装
-docker cp build/distributions/uyghur-analyzer-plugin-2.4.0-es8.zip es:/tmp/
-docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.4.0-es8.zip
+docker cp build/distributions/uyghur-analyzer-plugin-2.5.0-es8.zip es:/tmp/
+docker exec es elasticsearch-plugin install file:///tmp/uyghur-analyzer-plugin-2.5.0-es8.zip
 
 # 重启 Elasticsearch 以应用插件
 docker restart es

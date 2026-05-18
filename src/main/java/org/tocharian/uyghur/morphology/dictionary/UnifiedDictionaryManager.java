@@ -21,11 +21,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import org.tocharian.uyghur.morphology.utils.HarmonyClassifier;
+import org.tocharian.uyghur.morphology.utils.HarmonyClassifier.HarmonyClass;
 
 /**
  * 统一词典管理器
@@ -49,6 +53,11 @@ public class UnifiedDictionaryManager {
     private static final Pattern THU_SIMPLE_PATTERN = Pattern.compile("^(\\S+)\\s+(.+)$");              // 简单格式：词根 后缀
     private static final Pattern THU_DOT_PATTERN = Pattern.compile("^([^.()]+)\\.\\s+(.+)$");           // 点号格式：词根. 后缀
 
+    // F1+ fix: extract the parenthetical canonical form from a single suffix token.
+    // Example: "لىر(لەر)" → group(1)="لىر", group(2)="لەر"
+    //          "دىكى"      → group(1)="دىكى", group(2)=null
+    private static final Pattern SUFFIX_PAREN_PATTERN = Pattern.compile("^([^()]+)(?:\\(([^)]+)\\))?$");
+
     // 三个视图：原始、分割、自定义
     private Map<String, String[]> originalView;    // 元音修复形式
     private Map<String, String[]> splitView;       // 现代形式
@@ -57,6 +66,22 @@ public class UnifiedDictionaryManager {
     // F1: 词干级规范形索引：书写词干（元音弱化后）→ 规范词干（弱化前还原）
     // 来源：THUUyMorph 括号条目，如 ئائىلى.(ئائىلە) → ئائىلى→ئائىلە
     private Map<String, String> stemCanonicalIndex;
+
+    // Phase α: 后缀级规范形索引（按和谐类区分）
+    // 结构：written_suffix → (harmony_class → canonical_suffix)
+    // 例：لىر → {BACK: لار, FRONT: لەر}（取决于词干和谐类）
+    // 来源：THUUyMorph 后缀括号，如 لىر(لار), لىر(لەر)
+    //
+    // Built in two stages:
+    //   1. During parsing: accumulate counts in suffixCanonicalCounts
+    //   2. After parsing: pick majority candidate per (written, harmony) with min threshold
+    private Map<String, Map<HarmonyClass, String>> suffixCanonicalIndex;
+    private Map<String, Map<HarmonyClass, Map<String, Integer>>> suffixCanonicalCounts;
+
+    /** Minimum occurrence count required to accept a suffix-canonical mapping.
+     *  Filters out rare/noisy entries like قاندۇر. ى(ۇ) which would otherwise
+     *  pollute the index for a very common surface (ى). */
+    private static final int SUFFIX_MIN_COUNT = 2;
 
     // 原始THU数据存储
     private Map<String, String> rawThuData;
@@ -68,6 +93,8 @@ public class UnifiedDictionaryManager {
         this.splitView = new HashMap<>();
         this.customView = new HashMap<>();
         this.stemCanonicalIndex = new HashMap<>();
+        this.suffixCanonicalIndex = new HashMap<>();
+        this.suffixCanonicalCounts = new HashMap<>();
         this.rawThuData = new HashMap<>();
     }
 
@@ -180,7 +207,7 @@ public class UnifiedDictionaryManager {
         if (inputStream == null) {
             throw new IOException("Unable to find THUUyMorph dictionary resource: " + THU_DICTIONARY_PATH);
         }
-        
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -188,14 +215,51 @@ public class UnifiedDictionaryManager {
                 if (line.isEmpty()) {
                     continue;
                 }
-                
-                // 保存原始THU数据
                 rawThuData.put(line, line);
-                
-                // 解析并生成视图
                 parseThuEntry(line);
             }
         }
+
+        // Phase α: finalize the suffix index by majority voting + min-count threshold
+        finalizeSuffixCanonicalIndex();
+    }
+
+    /**
+     * Phase α helper: 把 (written_suffix, harmony, canonical_suffix) 计数转成最终索引。
+     * 对每个 (written, harmony) 桶：选出现次数最多的 canonical，并要求 count ≥ SUFFIX_MIN_COUNT。
+     * 这样过滤掉孤立噪声条目（如 قاندۇر. ى(ۇ) 这种单例）。
+     */
+    private void finalizeSuffixCanonicalIndex() {
+        for (Map.Entry<String, Map<HarmonyClass, Map<String, Integer>>> e : suffixCanonicalCounts.entrySet()) {
+            String written = e.getKey();
+            for (Map.Entry<HarmonyClass, Map<String, Integer>> he : e.getValue().entrySet()) {
+                HarmonyClass harmony = he.getKey();
+                String bestCanonical = null;
+                int bestCount = 0;
+                for (Map.Entry<String, Integer> ce : he.getValue().entrySet()) {
+                    if (ce.getValue() > bestCount) {
+                        bestCount = ce.getValue();
+                        bestCanonical = ce.getKey();
+                    }
+                }
+                if (bestCanonical != null && bestCount >= SUFFIX_MIN_COUNT) {
+                    suffixCanonicalIndex
+                        .computeIfAbsent(written, k -> new EnumMap<>(HarmonyClass.class))
+                        .put(harmony, bestCanonical);
+                }
+            }
+        }
+    }
+
+    /** Phase α: record an observation of (written, harmony) → canonical. Index finalised later. */
+    private void recordSuffixObservation(String written, HarmonyClass harmony, String canonical) {
+        if (written == null || canonical == null || written.equals(canonical)) {
+            return;
+        }
+        suffixCanonicalCounts
+            .computeIfAbsent(written, k -> new EnumMap<>(HarmonyClass.class))
+            .computeIfAbsent(harmony, k -> new HashMap<>())
+            .merge(canonical, 1, Integer::sum);
     }
     
     /**
@@ -232,20 +296,38 @@ public class UnifiedDictionaryManager {
             
             modernSegments[0] = modernForm;   // Split视图：现代词根
             originalSegments[0] = originalForm; // Original视图：历史词根
-            
-            // 后缀部分相同，清理括号变体
+
+            // Phase α: 用 canonical 词干（更接近"未弱化"的真实形态）判定和谐类
+            HarmonyClass stemHarmony = HarmonyClassifier.classifyWithFrontDefault(originalForm);
+
+            // F1+ fix: 正确解析每个后缀的"书写形(规范形)"对，分别填两个视图
             for (int i = 0; i < suffixParts.length; i++) {
-                String cleanSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "");
-                modernSegments[i + 1] = cleanSuffix;
-                originalSegments[i + 1] = cleanSuffix;
+                String writtenSuffix;
+                String canonicalSuffix;
+
+                Matcher sm = SUFFIX_PAREN_PATTERN.matcher(suffixParts[i].trim());
+                if (sm.matches()) {
+                    writtenSuffix = sm.group(1).trim();
+                    String paren = sm.group(2);
+                    canonicalSuffix = (paren == null || paren.isBlank()) ? writtenSuffix : paren.trim();
+                } else {
+                    // Pattern 不匹配（不应发生），保守地用原 token
+                    writtenSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "").trim();
+                    canonicalSuffix = writtenSuffix;
+                }
+
+                modernSegments[i + 1]   = writtenSuffix;     // Split：弱化后写形
+                originalSegments[i + 1] = canonicalSuffix;   // Original：未弱化规范形
+
+                // 仅当 written ≠ canonical 时才填后缀索引（identity 不需要还原）
+                recordSuffixObservation(writtenSuffix, stemHarmony, canonicalSuffix);
             }
-            
+
             // 两个视图使用相同Key，但分割结果不同
             splitView.put(unifiedKey, modernSegments);
             originalView.put(unifiedKey, originalSegments);
 
-            // F1: 记录词干级还原映射（书写词干 → 规范词干）
-            // 用于 OOV 层拆分后的 original 视图词干还原
+            // F1: 词干级还原映射（书写词干 → 规范词干）
             stemCanonicalIndex.putIfAbsent(modernForm, originalForm);
 
             return;
@@ -256,26 +338,40 @@ public class UnifiedDictionaryManager {
         if (matcher.matches()) {
             String root = matcher.group(1).trim();
             String suffixPart = matcher.group(2).trim();
-            
-            // 处理后缀部分，清理括号变体
+
             String[] suffixParts = suffixPart.split("\\s+");
-            
-            // 生成统一Key
             String unifiedKey = generateUnifiedKey(entry);
-            
-            // 构建分割结果
-            String[] segments = new String[suffixParts.length + 1];
-            segments[0] = root;
-            
+
+            // Phase α: 即使词干无括号，后缀仍可能有括号注释（如 تارماق. لىر(لار) ى）
+            // 用 root 自身判和谐类（无 canonical 信息可用）
+            HarmonyClass stemHarmony = HarmonyClassifier.classifyWithFrontDefault(root);
+
+            String[] modernSegments = new String[suffixParts.length + 1];
+            String[] originalSegments = new String[suffixParts.length + 1];
+            modernSegments[0] = root;
+            originalSegments[0] = root;  // 无 canonical 信息，两视图同
+
             for (int i = 0; i < suffixParts.length; i++) {
-                String cleanSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "");
-                segments[i + 1] = cleanSuffix;
+                String writtenSuffix;
+                String canonicalSuffix;
+                Matcher sm = SUFFIX_PAREN_PATTERN.matcher(suffixParts[i].trim());
+                if (sm.matches()) {
+                    writtenSuffix = sm.group(1).trim();
+                    String paren = sm.group(2);
+                    canonicalSuffix = (paren == null || paren.isBlank()) ? writtenSuffix : paren.trim();
+                } else {
+                    writtenSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "").trim();
+                    canonicalSuffix = writtenSuffix;
+                }
+                modernSegments[i + 1]   = writtenSuffix;
+                originalSegments[i + 1] = canonicalSuffix;
+
+                recordSuffixObservation(writtenSuffix, stemHarmony, canonicalSuffix);
             }
-            
-            // 点号格式在两个视图中相同
-            splitView.put(unifiedKey, segments);
-            originalView.put(unifiedKey, segments);
-            
+
+            splitView.put(unifiedKey, modernSegments);
+            originalView.put(unifiedKey, originalSegments);
+
             return;
         }
         
@@ -284,26 +380,39 @@ public class UnifiedDictionaryManager {
         if (matcher.matches()) {
             String root = matcher.group(1).trim();
             String suffixPart = matcher.group(2).trim();
-            
-            // 处理后缀部分，清理括号变体
+
             String[] suffixParts = suffixPart.split("\\s+");
-            
-            // 生成统一Key
             String unifiedKey = generateUnifiedKey(entry);
-            
-            // 构建分割结果
-            String[] segments = new String[suffixParts.length + 1];
-            segments[0] = root;
-            
+
+            // Phase α: 后缀可能带括号注释，同 DOT 分支
+            HarmonyClass stemHarmony = HarmonyClassifier.classifyWithFrontDefault(root);
+
+            String[] modernSegments = new String[suffixParts.length + 1];
+            String[] originalSegments = new String[suffixParts.length + 1];
+            modernSegments[0] = root;
+            originalSegments[0] = root;
+
             for (int i = 0; i < suffixParts.length; i++) {
-                String cleanSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "");
-                segments[i + 1] = cleanSuffix;
+                String writtenSuffix;
+                String canonicalSuffix;
+                Matcher sm = SUFFIX_PAREN_PATTERN.matcher(suffixParts[i].trim());
+                if (sm.matches()) {
+                    writtenSuffix = sm.group(1).trim();
+                    String paren = sm.group(2);
+                    canonicalSuffix = (paren == null || paren.isBlank()) ? writtenSuffix : paren.trim();
+                } else {
+                    writtenSuffix = suffixParts[i].replaceAll("\\([^)]*\\)", "").trim();
+                    canonicalSuffix = writtenSuffix;
+                }
+                modernSegments[i + 1]   = writtenSuffix;
+                originalSegments[i + 1] = canonicalSuffix;
+
+                recordSuffixObservation(writtenSuffix, stemHarmony, canonicalSuffix);
             }
-            
-            // 简单格式在两个视图中相同
-            splitView.put(unifiedKey, segments);
-            originalView.put(unifiedKey, segments);
-            
+
+            splitView.put(unifiedKey, modernSegments);
+            originalView.put(unifiedKey, originalSegments);
+
             return;
         }
         
@@ -374,6 +483,29 @@ public class UnifiedDictionaryManager {
     public String lookupCanonicalStem(String writtenStem) {
         return stemCanonicalIndex.get(writtenStem);
     }
+
+    /**
+     * Phase α: 查询后缀的规范形（弱化前还原），按词干和谐类区分。
+     *
+     * <p>例：(لىر, BACK)  → لار（"tarmaq + lar + i" 类条目还原）
+     *      (لىر, FRONT) → لەر（"aile + ler + i" 类条目还原）
+     *
+     * <p>若指定和谐类下无记录但其他和谐类有 → fallback 到另一类（次优）。
+     *
+     * @return 规范后缀，若完全无记录返回 null（调用方退化为 written 输出）
+     */
+    public String lookupCanonicalSuffix(String writtenSuffix, HarmonyClass harmony) {
+        Map<HarmonyClass, String> byHarmony = suffixCanonicalIndex.get(writtenSuffix);
+        if (byHarmony == null || byHarmony.isEmpty()) {
+            return null;
+        }
+        String exact = byHarmony.get(harmony);
+        if (exact != null) {
+            return exact;
+        }
+        // Fallback: 若本和谐类未见过，取任意已有变体（保留原形也行）
+        return byHarmony.values().iterator().next();
+    }
     
     /**
      * 查找最长匹配
@@ -439,6 +571,7 @@ public class UnifiedDictionaryManager {
         stats.put("splitView", splitView.size());
         stats.put("customView", customView.size());
         stats.put("stemCanonicalIndex", stemCanonicalIndex.size());
+        stats.put("suffixCanonicalIndex", suffixCanonicalIndex.size());
         stats.put("rawThuData", rawThuData.size());
         return stats;
     }
@@ -451,6 +584,8 @@ public class UnifiedDictionaryManager {
         splitView.clear();
         customView.clear();
         stemCanonicalIndex.clear();
+        suffixCanonicalIndex.clear();
+        suffixCanonicalCounts.clear();
         rawThuData.clear();
         initialized = false;
     }

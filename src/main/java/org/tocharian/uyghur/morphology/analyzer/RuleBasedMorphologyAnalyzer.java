@@ -25,6 +25,8 @@ import org.tocharian.uyghur.morphology.model.SegmentationPath;
 import org.tocharian.uyghur.morphology.model.ViterbiMorphologySegmenter;
 import org.tocharian.uyghur.morphology.model.WeightedModelCompiler;
 import org.tocharian.uyghur.morphology.model.WeightedMorphologyModel;
+import org.tocharian.uyghur.morphology.utils.HarmonyClassifier;
+import org.tocharian.uyghur.morphology.utils.HarmonyClassifier.HarmonyClass;
 import org.tocharian.uyghur.morphology.utils.UyghurCharacterUtils;
 
 import java.io.IOException;
@@ -334,9 +336,15 @@ public class RuleBasedMorphologyAnalyzer {
     };
 
     /**
-     * F2: 将 OOV 层（L3/L4）分析结果里的书写词干替换为规范形（元音弱化还原）。
+     * F2 + Phase α: 将 OOV 层（L3/L4）分析结果里的书写词干和书写后缀替换为规范形。
      *
-     * <p>仅在 viewType == ORIGINAL 时生效；若词干不在 stemCanonicalIndex 中则原样返回。
+     * <p>仅在 viewType == ORIGINAL 时生效。两步还原：
+     * <ol>
+     *   <li>词干：查 stemCanonicalIndex (F1) — 例 ئائىلى → ئائىلە</li>
+     *   <li>后缀：查 suffixCanonicalIndex (Phase α)，按词干和谐类区分
+     *       — 例 (لىر, FRONT) → لەر, (لىر, BACK) → لار</li>
+     * </ol>
+     * 任何一步若无记录则原样保留。
      */
     private MorphologyAnalysisResult applyStemCanonical(MorphologyAnalysisResult result, DictionaryView viewType) {
         if (result == null || viewType != DictionaryView.ORIGINAL) {
@@ -346,19 +354,41 @@ public class RuleBasedMorphologyAnalyzer {
         if (morphemes == null || morphemes.isEmpty()) {
             return result;
         }
-        String writtenStem = morphemes.get(0);
-        String canonical = unifiedDictionaryManager.lookupCanonicalStem(writtenStem);
-        if (canonical == null || canonical.equals(writtenStem)) {
-            return result;
-        }
+
         List<String> restored = new ArrayList<>(morphemes);
-        restored.set(0, canonical);
+        StringBuilder noteSuffix = new StringBuilder();
+
+        // 第一步：词干还原（F2）
+        String writtenStem = morphemes.get(0);
+        String canonicalStem = unifiedDictionaryManager.lookupCanonicalStem(writtenStem);
+        if (canonicalStem != null && !canonicalStem.equals(writtenStem)) {
+            restored.set(0, canonicalStem);
+            noteSuffix.append(" [stem:").append(writtenStem).append("→").append(canonicalStem).append("]");
+        }
+
+        // 第二步：后缀还原（Phase α）—— 用 canonical 词干判和谐类（更接近真实形态）
+        String stemForHarmony = (canonicalStem != null) ? canonicalStem : writtenStem;
+        HarmonyClass harmony = HarmonyClassifier.classifyWithFrontDefault(stemForHarmony);
+
+        for (int i = 1; i < restored.size(); i++) {
+            String writtenSuffix = restored.get(i);
+            String canonicalSuffix = unifiedDictionaryManager.lookupCanonicalSuffix(writtenSuffix, harmony);
+            if (canonicalSuffix != null && !canonicalSuffix.equals(writtenSuffix)) {
+                restored.set(i, canonicalSuffix);
+                noteSuffix.append(" [suf:").append(writtenSuffix).append("→").append(canonicalSuffix).append("]");
+            }
+        }
+
+        if (noteSuffix.length() == 0) {
+            return result;  // 没有任何还原发生
+        }
+
         return new MorphologyAnalysisResult(
             result.getOriginalWord(),
             restored,
             result.getConfidence(),
             result.getMethod(),
-            result.getNotes() + " [stem-canonical:" + writtenStem + "→" + canonical + "]"
+            result.getNotes() + noteSuffix.toString()
         );
     }
     

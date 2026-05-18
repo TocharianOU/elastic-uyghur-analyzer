@@ -20,12 +20,12 @@ jobs:
             elasticsearch-version: "8.7.0"
             lucene-version: "9.5.0"
             java-version: "17"
-            artifact: "uyghur-analyzer-plugin-2.4.0-es8.zip"
+            artifact: "uyghur-analyzer-plugin-2.5.0-es8.zip"
           - es-major: "9"
             elasticsearch-version: "9.4.0"
             lucene-version: "10.4.0"
             java-version: "24"
-            artifact: "uyghur-analyzer-plugin-2.4.0-es9.zip"
+            artifact: "uyghur-analyzer-plugin-2.5.0-es9.zip"
 
     steps:
       - name: Check out repository

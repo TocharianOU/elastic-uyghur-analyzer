@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-05
+### Added
+- Add a three-way Uyghur vowel harmony classifier for back, front, and neutral vowels.
+- Add suffix-level canonical restoration for the original analyzer view using THUUyMorph parenthetical suffix annotations.
+- Add a concise Chinese morphology logic note covering analyzer views, fallback order, suffix/clitic handling, vowel harmony, and canonical restoration.
+
+### Changed
+- Extend original-view OOV restoration from stem-only canonicalization to stem and suffix canonicalization.
+- Parse suffix written/canonical pairs separately so split output keeps the modern written suffix and original output can use the canonical suffix.
+
 ## [2.4.0] - 2026-05
 ### Added
 - Use the curated TSV affix inventory directly in fallback morphology analysis for suffix and clitic segmentation.
